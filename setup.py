@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:17:50
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-01 12:01:53
+# @Last Modified time: 2016-07-01 12:27:35
 
 from distutils.core import setup
 
@@ -17,6 +17,8 @@ setup(
     scripts=['bin/cf.py'],
     install_requires=[
       'docopt',
-      'pyyaml'
+      'pyyaml',
+      'psycopg2',
+      'sqlalchemy'
     ]
 )

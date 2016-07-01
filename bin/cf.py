@@ -4,7 +4,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:44:55
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-01 12:07:51
+# @Last Modified time: 2016-07-01 16:46:35
 
 """CoinFund Command-Line Interface
 
@@ -17,31 +17,49 @@ Options:
 """
 
 from docopt import docopt
+from coinfund.dao import *
 
 import yaml
 import sys
 
-SETTINGS = {}
+SETTINGS_FILE         = '.coinfund'       # name of the settings file
+SETTINGS              = {}                # coinfund-cli global configuration settings
+REQUIRED_SETTINGS     = ['database_uri']  # required settings
+
 def import_settings():
   """
-  Imports settings from a local file called `.coinfund-cli`. The file is 
+  Imports settings from a local file called `.coinfund`. The file is 
   in YAML format and accepts the following settings:
 
     database_uri: [database uri]    
-  
   """
+  global SETTINGS
+  
+  # try the settings file
   try:
-    with open('.coinfund-cli', 'r') as fp:
-      doc = yaml.load(fp)
-      if not doc['database_uri']:
-        print "Please provide a `database_uri` setting."
-        sys.exit(1)
-      else:
-        SETTINGS = doc
+    fp = open(SETTINGS_FILE, 'r')
   except:
-    print "Please create a .coinfund-cli settings file."
+    print('Please create a `%s` settings file.' % SETTINGS_FILE)
+    fp.close()
     sys.exit(1)
 
+  # load the settings file
+  doc = yaml.load(fp)
+  if not doc:
+    print('Your `%s` settings file appears to be empty.' % SETTINGS_FILE)
+    fp.close()
+    sys.exit(1)
+
+  # check required settings
+  for setting in REQUIRED_SETTINGS:
+    if setting not in doc:
+      print('Please provide a `%s` setting.' % setting)
+      fp.close()
+      sys.exit(1)
+      
+  # get the settings
+  SETTINGS = doc
+  fp.close()
 
 if __name__ == '__main__':
 
@@ -50,5 +68,6 @@ if __name__ == '__main__':
 
   # parse arguments
   args = docopt(__doc__, version='coinfund-cli 1.0')
+
   if args['vehicles']:
-    print "VEHICLES"
+    connect(SETTINGS)
