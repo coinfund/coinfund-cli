@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:17:50
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-01 12:27:35
+# @Last Modified time: 2016-07-01 17:02:14
 
 from distutils.core import setup
 
@@ -19,6 +19,7 @@ setup(
       'docopt',
       'pyyaml',
       'psycopg2',
-      'sqlalchemy'
+      'sqlalchemy',
+      'tabulate'
     ]
 )

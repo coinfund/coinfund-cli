@@ -4,12 +4,14 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:44:55
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-01 16:46:35
+# @Last Modified time: 2016-07-01 18:05:23
 
 """CoinFund Command-Line Interface
 
 Usage:
-  cf.py vehicles
+  cf investors
+  cf vehicles
+  cf positions
 
 Options:
   -h --help     Show this screen.
@@ -18,9 +20,11 @@ Options:
 
 from docopt import docopt
 from coinfund.dao import *
+from coinfund.formatter import Formatter
 
 import yaml
 import sys
+
 
 SETTINGS_FILE         = '.coinfund'       # name of the settings file
 SETTINGS              = {}                # coinfund-cli global configuration settings
@@ -34,7 +38,7 @@ def import_settings():
     database_uri: [database uri]    
   """
   global SETTINGS
-  
+
   # try the settings file
   try:
     fp = open(SETTINGS_FILE, 'r')
@@ -61,6 +65,29 @@ def import_settings():
   SETTINGS = doc
   fp.close()
 
+def main(args):
+  """
+  This function translates command arguments into
+  underlying function paths.
+  """
+
+  dao = CoinfundDao(SETTINGS)   # The data access layer object.
+  fmt = Formatter()             # The output formatter.
+
+  if args['investors']:
+    items = dao.investors()
+    fmt.print_list(items, Investor)
+
+  elif args['vehicles']:
+    items = dao.vehicles()
+    fmt.print_list(items, Vehicle)
+
+  elif args['positions']:
+    items = dao.positions()
+    fmt.print_list(items, Position)
+
+  dao.close()
+
 if __name__ == '__main__':
 
   # make sure cli settings are available
@@ -68,6 +95,6 @@ if __name__ == '__main__':
 
   # parse arguments
   args = docopt(__doc__, version='coinfund-cli 1.0')
+  main(args)
 
-  if args['vehicles']:
-    connect(SETTINGS)
+
