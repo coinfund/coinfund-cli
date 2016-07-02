@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-01 18:08:55
+# @Last Modified time: 2016-07-02 15:15:56
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric
@@ -49,7 +49,7 @@ class Position(Base):
   The position model.
   """
   __tablename__ = 'positions'
-  __headers__   = ['date', 'vehicle', 'position']
+  __headers__   = ['date', 'vehicle', 'position', 'currency']
 
   id            = Column(Integer, primary_key=True)
   date          = Column(DateTime)
@@ -58,4 +58,4 @@ class Position(Base):
   position      = Column(Numeric)
 
   def tabulate(self):
-    return [self.date, self.vehicle.name, self.position]
+    return [self.date, self.vehicle.name, self.position, self.vehicle.currency]
