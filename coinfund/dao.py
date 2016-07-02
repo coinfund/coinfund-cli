@@ -2,10 +2,10 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-01 18:36:54
+# @Last Modified time: 2016-07-02 15:12:11
 
 from sqlalchemy import create_engine, desc
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, joinedload
 from coinfund.models import Investor, Vehicle, Position
 
 class CoinfundDao(object):
@@ -38,7 +38,10 @@ class CoinfundDao(object):
     """
     Return a list of all Positions.
     """
-    return self.session.query(Position).join(Vehicle).distinct('vehicle_id').order_by(desc('vehicle_id'), desc('date'))
+    result = self.session.query(Position).options(joinedload('vehicle')).join(Vehicle).distinct('vehicle_id').order_by(desc('vehicle_id'), desc('date'))
+    print(result)
+    return result
+
   def close(self):
     """
     Close all sessions.

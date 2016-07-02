@@ -4,7 +4,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:44:55
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-01 18:05:23
+# @Last Modified time: 2016-07-02 15:07:01
 
 """CoinFund Command-Line Interface
 
@@ -76,15 +76,15 @@ def main(args):
 
   if args['investors']:
     items = dao.investors()
-    fmt.print_list(items, Investor)
+    fmt.print_list(items, Investor.__headers__)
 
   elif args['vehicles']:
     items = dao.vehicles()
-    fmt.print_list(items, Vehicle)
+    fmt.print_list(items, Vehicle.__headers__)
 
   elif args['positions']:
     items = dao.positions()
-    fmt.print_list(items, Position)
+    fmt.print_list(items, Position.__headers__)
 
   dao.close()
 
