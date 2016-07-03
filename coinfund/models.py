@@ -2,11 +2,12 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-03 14:49:56
+# @Last Modified time: 2016-07-03 16:27:36
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric
 from sqlalchemy.orm import relationship
+from datetime import datetime
 
 # Base
 Base = declarative_base()
@@ -18,12 +19,14 @@ class Investor(Base):
   __tablename__ = 'investors'
   __headers__ = ['id', 'first_name', 'last_name', 'email', 'updated_at', 'created_at']
 
-  id          = Column(Integer, primary_key=True)
-  first_name  = Column(String)
-  last_name   = Column(String)
-  email       = Column(String)
-  updated_at  = Column(DateTime)
-  created_at  = Column(DateTime)
+  id              = Column(Integer, primary_key=True)
+  first_name      = Column(String, nullable=False)
+  last_name       = Column(String, nullable=False)
+  email           = Column(String, nullable=False, unique=True)
+  password_digest = Column(String)
+  access_token    = Column(String)
+  updated_at      = Column(DateTime, default=datetime.now)
+  created_at      = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
   def fullname(self):
     return ' '.join([self.first_name, self.last_name])
