@@ -1,4 +1,4 @@
-"""Add project table.
+"""Add projects table.
 
 Revision ID: f46e4d1e9a08
 Revises: 184e826cb0b2
@@ -14,7 +14,6 @@ depends_on = None
 
 from alembic import op
 import sqlalchemy as sa
-
 
 def upgrade():
   op.create_table('projects',
