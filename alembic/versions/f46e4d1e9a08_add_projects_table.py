@@ -19,6 +19,7 @@ def upgrade():
   op.create_table('projects',
     sa.Column('id', sa.Integer, primary_key=True),
     sa.Column('name', sa.String(50), nullable=False),
+    sa.Column('description', sa.String),
     sa.Column('homepage', sa.String),
     sa.Column('created_at', sa.DateTime, server_default=sa.func.now()),
     sa.Column('updated_at', sa.DateTime, server_default=sa.func.now(), server_onupdate=sa.func.now()),

@@ -18,7 +18,7 @@ import sqlalchemy as sa
 def upgrade():
   op.create_table('shares', 
     sa.Column('id', sa.Integer, primary_key=True),
-    sa.Column('investor_id', sa.Integer, sa.ForeignKey('investors.id')),
+    sa.Column('investor_id', sa.Integer, sa.ForeignKey('investors.id'), nullable=False),
     sa.Column('units', sa.Integer, default=0, nullable=False),
     sa.Column('created_at', sa.DateTime, server_default=sa.func.now()),
     sa.Column('updated_at', sa.DateTime, server_default=sa.func.now(), server_onupdate=sa.func.now()),

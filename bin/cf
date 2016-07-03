@@ -12,8 +12,9 @@ Usage:
   cf investors
   cf investors add
   cf instruments
-  cf investments
   cf shares [--investor-id=<id>] [--total]
+  cf projects
+  cf investments
   cf vehicles
   cf positions
   cf rates [--instr=<instr>]
@@ -96,10 +97,6 @@ def main(args):
     items = dao.instruments()
     fmt.print_list(items, Instrument.__headers__)
 
-  elif args['investments']:
-    items = dao.investments()
-    fmt.print_list(items, Investment.__headers__)
-
   elif args['shares']:
     total = args.get('--total')
     investor_id = args.get('--investor-id')
@@ -110,6 +107,14 @@ def main(args):
     else:   
       items = dao.shares(investor_id=investor_id)
       fmt.print_list(items, Share.__headers__)
+
+  elif args['projects']:
+    items = dao.projects()
+    fmt.print_list(items, Project.__headers__)
+
+  elif args['investments']:
+    items = dao.investments()
+    fmt.print_list(items, Investment.__headers__)
 
   elif args['vehicles']:
     items = dao.vehicles()
