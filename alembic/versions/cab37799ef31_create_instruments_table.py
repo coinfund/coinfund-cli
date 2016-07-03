@@ -13,6 +13,8 @@ branch_labels = None
 depends_on = None
 
 from alembic import op
+from datetime import datetime
+
 import sqlalchemy as sa
 
 
@@ -21,7 +23,7 @@ def upgrade():
     'instruments',
     sa.Column('id', sa.Integer, primary_key=True),
     sa.Column('name', sa.String, nullable=False),
-    sa.Column('symbol', sa.String, nullable=False),
+    sa.Column('symbol', sa.String, nullable=False, unique=True),
     sa.Column('created_at', sa.DateTime, default=datetime.now),
     sa.Column('updated_at', sa.DateTime, default=datetime.now, onupdate=datetime.now),
   )

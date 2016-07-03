@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-03 16:27:36
+# @Last Modified time: 2016-07-03 16:29:58
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric
@@ -34,6 +34,19 @@ class Investor(Base):
   def tabulate(self):
     return [self.id, self.first_name, self.last_name, self.email, self.updated_at, self.created_at]
 
+class Instrument(Base):
+  """
+  The instrument model.
+  """
+  __tablename__   = 'instruments'
+  __headers__     = ['id', 'name', 'symbol']
+
+  id              = Column(Integer, primary_key=True)
+  name            = Column(String, nullable=False)
+  symbol          = Column(String, nullable=False, unique=True)
+
+  def tabulate(self):
+    return [self.id, self.name, self.symbol]
 
 class Vehicle(Base):
   """
