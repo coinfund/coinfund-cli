@@ -11,6 +11,7 @@
 Usage:
   cf investors
   cf investors add
+  cf instruments
   cf investments
   cf shares [--investor-id=<id>] [--total]
   cf vehicles
@@ -89,6 +90,10 @@ def main(args):
     else:
       items = dao.investors()
       fmt.print_list(items, Investor.__headers__)
+
+  elif args['instruments']:
+    items = dao.instruments()
+    fmt.print_list(items, Instrument.__headers__)
 
   elif args['investments']:
     items = dao.investments()

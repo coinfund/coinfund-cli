@@ -2,11 +2,11 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-03 15:02:32
+# @Last Modified time: 2016-07-03 16:33:26
 
 from sqlalchemy import create_engine, desc, asc
 from sqlalchemy.orm import sessionmaker, joinedload
-from coinfund.models import Investor, Vehicle, Position, Investment, Share, Rate
+from coinfund.models import Investor, Instrument, Vehicle, Position, Investment, Share, Rate
 from sqlalchemy.sql import func
 
 class CoinfundDao(object):
@@ -31,6 +31,12 @@ class CoinfundDao(object):
     Return a list of all Investors.
     """
     return self.session.query(Investor)
+
+  def instruments(self):
+    """
+    Return a list of all Instruments.
+    """
+    return self.session.query(Instrument).order_by(asc('symbol'))
 
   def vehicles(self):
     """
@@ -88,7 +94,7 @@ class CoinfundDao(object):
     result = self.session.query(Rate).distinct('base_curr', 'to_curr').order_by(desc('base_curr'), desc('to_curr'), desc('date'))
     if instr:
       result = result.filter(Rate.base_curr == instr)
-      
+
     return result
 
   def close(self):
