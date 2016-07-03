@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:17:50
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-02 15:17:36
+# @Last Modified time: 2016-07-03 15:54:45
 
 from distutils.core import setup
 
@@ -20,6 +20,7 @@ setup(
       'pyyaml',
       'psycopg2',
       'sqlalchemy',
-      'tabulate'
+      'tabulate',
+      'alembic'
     ]
 )
