@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-02 15:12:49
+# @Last Modified time: 2016-07-02 15:21:14
 
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker, joinedload
@@ -12,7 +12,10 @@ class CoinfundDao(object):
 
   def __init__(self, settings):
     self.settings = settings
-    self.engine = create_engine(self.settings['database_uri'], echo=True)
+
+    debug = self.settings.get('debug')
+    print(debug)
+    self.engine = create_engine(self.settings['database_uri'], echo=debug)
     self.Session = sessionmaker(bind=self.engine)
     self.session = self.Session()
 

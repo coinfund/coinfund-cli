@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:17:50
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-01 17:02:14
+# @Last Modified time: 2016-07-02 15:17:36
 
 from distutils.core import setup
 
@@ -14,7 +14,7 @@ setup(
     author_email='jake@coinfund.io',
     url='https://github.com/coinfund/coinfund-cli',
     packages=['coinfund'],
-    scripts=['bin/cf.py'],
+    scripts=['bin/cf'],
     install_requires=[
       'docopt',
       'pyyaml',
