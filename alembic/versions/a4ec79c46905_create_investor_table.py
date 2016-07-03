@@ -13,8 +13,6 @@ branch_labels = None
 depends_on = None
 
 from alembic import op
-from datetime import datetime
-
 import sqlalchemy as sa
 
 
@@ -27,9 +25,9 @@ def upgrade():
       sa.Column('email', sa.String, nullable=False, unique=True),
       sa.Column('password_digest', sa.String(50)),
       sa.Column('access_token', sa.String(50)),
-      sa.Column('created_at', sa.DateTime, default=datetime.now),
-      sa.Column('updated_at', sa.DateTime, default=datetime.now, onupdate=datetime.now),
-    )
+      sa.Column('created_at', sa.DateTime, server_default=sa.func.now()),
+      sa.Column('updated_at', sa.DateTime, server_default=sa.func.now(), server_onupdate=sa.func.now()),
+   )
 
 def downgrade():
     op.drop_table('investors')
