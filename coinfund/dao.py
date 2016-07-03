@@ -2,11 +2,11 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-03 12:30:42
+# @Last Modified time: 2016-07-03 14:54:21
 
 from sqlalchemy import create_engine, desc, asc
 from sqlalchemy.orm import sessionmaker, joinedload
-from coinfund.models import Investor, Vehicle, Position, Investment, Share
+from coinfund.models import Investor, Vehicle, Position, Investment, Share, Rate
 from sqlalchemy.sql import func
 
 class CoinfundDao(object):
@@ -77,8 +77,15 @@ class CoinfundDao(object):
     result = self.session.query(func.sum(Share.shares_issued))
 
     if investor_id:
-      result = result.filter(Share.investor_id == investor_id)
+      result =  result.filter(Share.investor_id == investor_id)
     
+    return result
+
+  def rates(self):
+    """
+    Return latest rates.
+    """
+    result = self.session.query(Rate).distinct('base_curr', 'to_curr').order_by(desc('base_curr'), desc('to_curr'), desc('date'))
     return result
 
   def close(self):

@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-03 12:09:07
+# @Last Modified time: 2016-07-03 14:49:56
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric
@@ -103,3 +103,19 @@ class Share(Base):
 
   def tabulate(self):
     return [self.date, self.investor.fullname(), self.shares_issued, self.price_per_share, self.cost_basis_btc, self.cost_basis_usd, self.created_at, self.updated_at]  
+
+class Rate(Base):
+  """
+  The rate model.
+  """
+  __tablename__   = 'convs'
+  __headers__     = ['date', 'base_curr', 'to_curr', 'rate']
+
+  id              = Column(Integer, primary_key=True)
+  date            = Column(DateTime)
+  base_curr       = Column(String)
+  to_curr         = Column(String)
+  rate            = Column(Numeric)
+
+  def tabulate(self):
+    return [self.date, self.base_curr, self.to_curr, self.rate]

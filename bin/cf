@@ -15,6 +15,7 @@ Usage:
   cf shares [--investor-id=<id>] [--total]
   cf vehicles
   cf positions
+  cf rates
 
 Options:
   -h --help     Show this screen.
@@ -111,6 +112,10 @@ def main(args):
   elif args['positions']:
     items = dao.positions()
     fmt.print_list(items, Position.__headers__)
+
+  elif args['rates']:
+    items = dao.rates()
+    fmt.print_list(items, Rate.__headers__, floatfmt='.8f')
 
   dao.close()
 
