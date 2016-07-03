@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-02 15:15:56
+# @Last Modified time: 2016-07-03 12:09:07
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric
@@ -16,7 +16,7 @@ class Investor(Base):
   The investor model.
   """
   __tablename__ = 'investors'
-  __headers__ = ['first_name', 'last_name', 'email', 'updated_at', 'created_at']
+  __headers__ = ['id', 'first_name', 'last_name', 'email', 'updated_at', 'created_at']
 
   id          = Column(Integer, primary_key=True)
   first_name  = Column(String)
@@ -25,8 +25,12 @@ class Investor(Base):
   updated_at  = Column(DateTime)
   created_at  = Column(DateTime)
 
+  def fullname(self):
+    return ' '.join([self.first_name, self.last_name])
+
   def tabulate(self):
-    return [self.first_name, self.last_name, self.email, self.updated_at, self.created_at]
+    return [self.id, self.first_name, self.last_name, self.email, self.updated_at, self.created_at]
+
 
 class Vehicle(Base):
   """
@@ -44,6 +48,7 @@ class Vehicle(Base):
   def tabulate(self):
     return [self.name, self.description, self.url, self.currency]
 
+
 class Position(Base):
   """
   The position model.
@@ -59,3 +64,42 @@ class Position(Base):
 
   def tabulate(self):
     return [self.date, self.vehicle.name, self.position, self.vehicle.currency]
+
+class Investment(Base):
+  """
+  The investment model.
+  """
+  __tablename__ = 'investments'
+  __headers__   = ['date', 'investor', 'kind', 'cost_basis_btc', 'cost_basis_usd']
+
+  id              = Column(Integer, primary_key=True)
+  date            = Column(DateTime)
+  investor_id     = Column(Integer, ForeignKey('investors.id'))
+  investor        = relationship('Investor')
+  kind            = Column(String)
+  cost_basis_btc  = Column(Numeric)
+  cost_basis_usd  = Column(Numeric)
+
+  def tabulate(self):
+    return [self.date, self.investor.fullname(), self.kind, self.cost_basis_btc, self.cost_basis_usd]
+
+class Share(Base):
+  """
+  The share model.
+  """
+  __tablename__ = 'shares'
+  __headers__   = ['date', 'investor', 'shares_issued', 'pps', 'cost_basis_btc', 'cost_basis_usd', 'created_at', 'updated_at']
+
+  id              = Column(Integer, primary_key=True)
+  date            = Column(DateTime)
+  investor_id     = Column(Integer, ForeignKey('investors.id'))
+  investor        = relationship('Investor')
+  price_per_share = Column(Numeric)
+  cost_basis_btc  = Column(Numeric)
+  cost_basis_usd  = Column(Numeric)
+  shares_issued   = Column(Integer)
+  created_at      = Column(DateTime)
+  updated_at      = Column(DateTime)
+
+  def tabulate(self):
+    return [self.date, self.investor.fullname(), self.shares_issued, self.price_per_share, self.cost_basis_btc, self.cost_basis_usd, self.created_at, self.updated_at]  

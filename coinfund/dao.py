@@ -2,11 +2,12 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-03 11:00:07
+# @Last Modified time: 2016-07-03 12:30:42
 
-from sqlalchemy import create_engine, desc
+from sqlalchemy import create_engine, desc, asc
 from sqlalchemy.orm import sessionmaker, joinedload
-from coinfund.models import Investor, Vehicle, Position
+from coinfund.models import Investor, Vehicle, Position, Investment, Share
+from sqlalchemy.sql import func
 
 class CoinfundDao(object):
 
@@ -41,7 +42,43 @@ class CoinfundDao(object):
     """
     Return a list of all Positions.
     """
-    result = self.session.query(Position).options(joinedload('vehicle')).distinct('vehicle_id').order_by(desc('vehicle_id'), desc('date'))
+    result = self.session.query(Position) \
+                  .options(joinedload('vehicle')) \
+                  .distinct('vehicle_id') \
+                  .order_by(desc('vehicle_id'), desc('date'))
+    return result
+
+  def investments(self):
+    """
+    Return a list of all Investments.
+    """
+    result = self.session.query(Investment) \
+                 .options(joinedload('investor')) \
+                 .order_by(asc('date'))
+    return result
+
+  def shares(self, investor_id=None):
+    """
+    Return a list of all Shares.
+    """
+    result = self.session.query(Share) \
+                 .options(joinedload('investor')) \
+                 .order_by(asc('date'))
+
+    if investor_id:
+      result = result.filter(Share.investor_id == investor_id)
+
+    return result
+
+  def total_shares(self, investor_id=None):
+    """
+    Return total shares.
+    """
+    result = self.session.query(func.sum(Share.shares_issued))
+
+    if investor_id:
+      result = result.filter(Share.investor_id == investor_id)
+    
     return result
 
   def close(self):

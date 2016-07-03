@@ -10,16 +10,21 @@
 
 Usage:
   cf investors
+  cf investors add
+  cf investments
+  cf shares [--investor-id=<id>] [--total]
   cf vehicles
   cf positions
 
 Options:
   -h --help     Show this screen.
+  --total       Sum breakdowns.
 
 """
 
 from docopt import docopt
 from coinfund.dao import *
+from coinfund.cli import Cli
 from coinfund.formatter import Formatter
 
 import yaml
@@ -74,10 +79,30 @@ def main(args):
 
   dao = CoinfundDao(SETTINGS)   # The data access layer object.
   fmt = Formatter()             # The output formatter.
+  cli = Cli()
 
   if args['investors']:
-    items = dao.investors()
-    fmt.print_list(items, Investor.__headers__)
+    if args['add']:
+      investor = cli.new_investor()
+      print(investor)
+    else:
+      items = dao.investors()
+      fmt.print_list(items, Investor.__headers__)
+
+  elif args['investments']:
+    items = dao.investments()
+    fmt.print_list(items, Investment.__headers__)
+
+  elif args['shares']:
+    total = args.get('--total')
+    investor_id = args.get('--investor-id')
+    
+    if total:
+      items = dao.total_shares(investor_id=investor_id)
+      fmt.print_result(items, ['total_shares'])
+    else:   
+      items = dao.shares(investor_id=investor_id)
+      fmt.print_list(items, Share.__headers__)
 
   elif args['vehicles']:
     items = dao.vehicles()
@@ -96,6 +121,7 @@ if __name__ == '__main__':
 
   # parse arguments
   args = docopt(__doc__, version='coinfund-cli 1.0')
+  print(args)
   main(args)
 
 
