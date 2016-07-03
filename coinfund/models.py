@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-03 17:32:24
+# @Last Modified time: 2016-07-03 17:40:16
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric, func
@@ -91,16 +91,19 @@ class Vehicle(Base):
   The vehicle model.
   """
   __tablename__ = 'vehicles'
-  __headers__   = ['name', 'description', 'url', 'currency']
+  __headers__   = ['name', 'instrument', 'homepage', 'description']
 
   id          = Column(Integer, primary_key=True)
-  name        = Column(String)
-  description = Column(String)
-  url         = Column(String)
-  currency    = Column(String)
+  name        = Column(String, nullable=False)
+  instr_id    = Column(Integer, ForeignKey('instruments.id'), nullable=False)
+  instrument  = relationship('Instrument')
+  project_id  = Column(Integer, ForeignKey('projects.id'))
+  project     = relationship('Project')
+  created_at      = Column(DateTime, default=datetime.now)
+  updated_at      = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
   def tabulate(self):
-    return [self.name, self.description, self.url, self.currency]
+    return [self.name, self.instrument.symbol, self.project.homepage, self.project.description]
 
 
 class Position(Base):

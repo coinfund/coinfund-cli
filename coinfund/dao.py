@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-03 17:32:11
+# @Last Modified time: 2016-07-03 17:40:51
 
 from sqlalchemy import create_engine, desc, asc
 from sqlalchemy.orm import sessionmaker, joinedload
@@ -38,12 +38,6 @@ class CoinfundDao(object):
     """
     return self.session.query(Instrument).order_by(asc('symbol'))
 
-  def vehicles(self):
-    """
-    Return a list of all Vehicles.
-    """
-    return self.session.query(Vehicle)
-
   def shares(self, investor_id=None):
     """
     Return a list of all Shares.
@@ -63,6 +57,12 @@ class CoinfundDao(object):
     """
     result = self.session.query(Project)
     return result
+
+  def vehicles(self):
+    """
+    Return a list of all Vehicles.
+    """
+    return self.session.query(Vehicle).options(joinedload('instrument'), joinedload('project'))
 
   ### OLD
 

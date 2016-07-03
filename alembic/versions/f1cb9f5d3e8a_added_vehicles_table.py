@@ -20,6 +20,7 @@ def upgrade():
     'vehicles',
     sa.Column('id', sa.Integer, primary_key=True),
     sa.Column('name', sa.String(50), nullable=False),
+    sa.Column('instr_id', sa.Integer, sa.ForeignKey('instruments.id'), nullable=False),
     sa.Column('project_id', sa.Integer, sa.ForeignKey('projects.id')),
     sa.Column('created_at', sa.DateTime, server_default=sa.func.now()),
     sa.Column('updated_at', sa.DateTime, server_default=sa.func.now(), server_onupdate=sa.func.now()),
