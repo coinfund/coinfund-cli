@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-03 16:54:58
+# @Last Modified time: 2016-07-03 17:09:23
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric
@@ -39,7 +39,7 @@ class Instrument(Base):
   The instrument model.
   """
   __tablename__   = 'instruments'
-  __headers__     = ['id', 'name', 'symbol']
+  __headers__     = ['id', 'name', 'symbol', 'created_at', 'updated_at']
 
   id              = Column(Integer, primary_key=True)
   name            = Column(String, nullable=False)
@@ -48,7 +48,7 @@ class Instrument(Base):
   created_at      = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
   def tabulate(self):
-    return [self.id, self.name, self.symbol]
+    return [self.id, self.name, self.symbol, self.created_at, self.updated_at]
 
 class Share(Base):
   """

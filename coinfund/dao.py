@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-03 16:33:26
+# @Last Modified time: 2016-07-03 17:12:03
 
 from sqlalchemy import create_engine, desc, asc
 from sqlalchemy.orm import sessionmaker, joinedload
@@ -80,7 +80,7 @@ class CoinfundDao(object):
     """
     Return total shares.
     """
-    result = self.session.query(func.sum(Share.shares_issued))
+    result = self.session.query(func.sum(Share.units))
 
     if investor_id:
       result =  result.filter(Share.investor_id == investor_id)
