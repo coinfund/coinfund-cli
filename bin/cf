@@ -34,7 +34,7 @@ import sys
 
 SETTINGS_FILE         = '.coinfund'                 # name of the settings file
 SETTINGS              = {}                          # coinfund-cli global configuration settings
-REQUIRED_SETTINGS     = ['database_uri', 'debug']   # required settings
+REQUIRED_SETTINGS     = ['database_uri']            # required settings
 
 def import_settings():
   """
@@ -127,7 +127,6 @@ if __name__ == '__main__':
 
   # parse arguments
   args = docopt(__doc__, version='coinfund-cli 1.0')
-  print(args)
   main(args)
 
 
