@@ -86,6 +86,7 @@ def main(args):
   if args['investors']:
     if args['add']:
       investor = cli.new_investor()
+      # TODO
       print(investor)
     else:
       items = dao.investors()
@@ -132,6 +133,8 @@ if __name__ == '__main__':
 
   # parse arguments
   args = docopt(__doc__, version='coinfund-cli 1.0')
-  main(args)
-
+  try:
+    main(args)
+  except Exception as e:
+    print(e)
 
