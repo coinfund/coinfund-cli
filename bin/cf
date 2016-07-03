@@ -15,7 +15,7 @@ Usage:
   cf shares [--investor-id=<id>] [--total]
   cf vehicles
   cf positions
-  cf rates
+  cf rates [--instr=<instr>]
 
 Options:
   -h --help     Show this screen.
@@ -114,7 +114,8 @@ def main(args):
     fmt.print_list(items, Position.__headers__)
 
   elif args['rates']:
-    items = dao.rates()
+    instr = args.get('--instr')
+    items = dao.rates(instr=instr)
     fmt.print_list(items, Rate.__headers__, floatfmt='.8f')
 
   dao.close()

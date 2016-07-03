@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-03 14:54:21
+# @Last Modified time: 2016-07-03 15:02:32
 
 from sqlalchemy import create_engine, desc, asc
 from sqlalchemy.orm import sessionmaker, joinedload
@@ -81,11 +81,14 @@ class CoinfundDao(object):
     
     return result
 
-  def rates(self):
+  def rates(self, instr=None):
     """
     Return latest rates.
     """
     result = self.session.query(Rate).distinct('base_curr', 'to_curr').order_by(desc('base_curr'), desc('to_curr'), desc('date'))
+    if instr:
+      result = result.filter(Rate.base_curr == instr)
+      
     return result
 
   def close(self):

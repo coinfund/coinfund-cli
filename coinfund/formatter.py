@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 17:51:19
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-03 14:59:54
+# @Last Modified time: 2016-07-03 15:00:45
 
 from tabulate import tabulate
 
@@ -21,4 +21,4 @@ class Formatter(object):
     self.print_result(items, headers, floatfmt=floatfmt, tablefmt=tablefmt)
   
   def print_result(self, items, headers, floatfmt=Constants.__floatfmt__, tablefmt=Constants.__tablefmt__):
-    print(tabulate(items, headers, tablefmt='fancy_grid', floatfmt=floatfmt, tablefmt=tablefmt))
+    print(tabulate(items, headers, floatfmt=floatfmt, tablefmt=tablefmt))
