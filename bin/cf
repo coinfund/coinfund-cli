@@ -63,7 +63,7 @@ def import_settings():
       
   # get the settings
   SETTINGS = doc
-  print(SETTINGS)
+
   fp.close()
 
 def main(args):
