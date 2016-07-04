@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-03 17:40:51
+# @Last Modified time: 2016-07-04 14:53:59
 
 from sqlalchemy import create_engine, desc, asc
 from sqlalchemy.orm import sessionmaker, joinedload
@@ -44,7 +44,7 @@ class CoinfundDao(object):
     """
     result = self.session.query(Share) \
                  .options(joinedload('investor')) \
-                 .order_by(asc('date'))
+                 .order_by(asc('created_at'))
 
     if investor_id:
       result = result.filter(Share.investor_id == investor_id)

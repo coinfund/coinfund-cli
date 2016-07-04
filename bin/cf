@@ -26,9 +26,8 @@ Options:
 """
 
 from docopt import docopt
-from coinfund.dao import *
-from coinfund.cli import Cli
-from coinfund.formatter import Formatter
+from coinfund.dao import CoinfundDao
+from coinfund.cli import Dispatcher
 
 import yaml
 import sys
@@ -79,57 +78,9 @@ def main(args):
   This function translates command arguments into
   underlying function paths.
   """
-
-  dao = CoinfundDao(SETTINGS)   # The data access layer object.
-  fmt = Formatter()             # The output formatter.
-  cli = Cli()
-
-  if args['investors']:
-    if args['add']:
-      investor = cli.new_investor()
-      # TODO
-      print(investor)
-    else:
-      items = dao.investors()
-      fmt.print_list(items, Investor.__headers__)
-
-  elif args['instruments']:
-    items = dao.instruments()
-    fmt.print_list(items, Instrument.__headers__)
-
-  elif args['shares']:
-    total = args.get('--total')
-    investor_id = args.get('--investor-id')
-    
-    if total:
-      items = dao.total_shares(investor_id=investor_id)
-      fmt.print_result(items, ['total_shares'])
-    else:   
-      items = dao.shares(investor_id=investor_id)
-      fmt.print_list(items, Share.__headers__)
-
-  elif args['projects']:
-    items = dao.projects()
-    fmt.print_list(items, Project.__headers__)
-
-  elif args['investments']:
-    items = dao.investments()
-    fmt.print_list(items, Investment.__headers__)
-
-  elif args['vehicles']:
-    items = dao.vehicles()
-    fmt.print_list(items, Vehicle.__headers__)
-
-  elif args['positions']:
-    items = dao.positions()
-    fmt.print_list(items, Position.__headers__)
-
-  elif args['rates']:
-    instr = args.get('--instr')
-    items = dao.rates(instr=instr)
-    fmt.print_list(items, Rate.__headers__, floatfmt='.8f')
-
-  dao.close()
+  dao = CoinfundDao(SETTINGS)
+  dispatcher = Dispatcher(dao)
+  dispatcher.dispatch(args)
 
 if __name__ == '__main__':
 

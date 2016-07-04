@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-03 17:40:16
+# @Last Modified time: 2016-07-04 14:53:39
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric, func
@@ -25,8 +25,8 @@ class Investor(Base):
   email           = Column(String, nullable=False, unique=True)
   password_digest = Column(String)
   access_token    = Column(String)
-  created_at      = Column(DateTime, default=datetime.now)
-  updated_at      = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+  created_at      = Column(DateTime, server_default=func.now())
+  updated_at      = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
 
   def fullname(self):
     return ' '.join([self.first_name, self.last_name])
@@ -44,8 +44,8 @@ class Instrument(Base):
   id              = Column(Integer, primary_key=True)
   name            = Column(String, nullable=False)
   symbol          = Column(String, nullable=False, unique=True)
-  created_at      = Column(DateTime, default=datetime.now)
-  updated_at      = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+  created_at      = Column(DateTime, server_default=func.now())
+  updated_at      = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
 
   def tabulate(self):
     return [self.id, self.name, self.symbol, self.created_at, self.updated_at]
@@ -55,18 +55,17 @@ class Share(Base):
   The share model.
   """
   __tablename__ = 'shares'
-  __headers__   = ['date', 'investor', 'units', 'created_at', 'updated_at']
+  __headers__   = ['investor', 'units', 'created_at', 'updated_at']
 
   id              = Column(Integer, primary_key=True)
-  date            = Column(DateTime, nullable=False)
   investor_id     = Column(Integer, ForeignKey('investors.id'), nullable=False)
   investor        = relationship('Investor')
   units           = Column(Integer, nullable=False, default=0)
-  created_at      = Column(DateTime, default=datetime.now)
-  updated_at      = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+  created_at      = Column(DateTime, server_default=func.now())
+  updated_at      = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
 
   def tabulate(self):
-    return [self.date, self.investor.fullname(), self.units, self.created_at, self.updated_at]  
+    return [self.investor.fullname(), self.units, self.created_at, self.updated_at]  
 
 class Project(Base):
   """
@@ -79,8 +78,8 @@ class Project(Base):
   name            = Column(String, nullable=False)
   homepage        = Column(String)
   description     = Column(String)
-  created_at      = Column(DateTime, default=datetime.now)
-  updated_at      = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+  created_at      = Column(DateTime, server_default=func.now())
+  updated_at      = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
 
   def tabulate(self):
     return [self.name, self.homepage, self.description, self.created_at, self.updated_at]
@@ -93,14 +92,14 @@ class Vehicle(Base):
   __tablename__ = 'vehicles'
   __headers__   = ['name', 'instrument', 'homepage', 'description']
 
-  id          = Column(Integer, primary_key=True)
-  name        = Column(String, nullable=False)
-  instr_id    = Column(Integer, ForeignKey('instruments.id'), nullable=False)
-  instrument  = relationship('Instrument')
-  project_id  = Column(Integer, ForeignKey('projects.id'))
-  project     = relationship('Project')
-  created_at      = Column(DateTime, default=datetime.now)
-  updated_at      = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+  id              = Column(Integer, primary_key=True)
+  name            = Column(String, nullable=False)
+  instr_id        = Column(Integer, ForeignKey('instruments.id'), nullable=False)
+  instrument      = relationship('Instrument')
+  project_id      = Column(Integer, ForeignKey('projects.id'))
+  project         = relationship('Project')
+  created_at      = Column(DateTime, server_default=func.now())
+  updated_at      = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
 
   def tabulate(self):
     return [self.name, self.instrument.symbol, self.project.homepage, self.project.description]
