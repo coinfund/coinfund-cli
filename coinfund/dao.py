@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-04 14:53:59
+# @Last Modified time: 2016-07-04 15:59:37
 
 from sqlalchemy import create_engine, desc, asc
 from sqlalchemy.orm import sessionmaker, joinedload
@@ -31,6 +31,17 @@ class CoinfundDao(object):
     Return a list of all Investors.
     """
     return self.session.query(Investor)
+
+  def create_investor(self, investor):
+    """
+    Create an investor record.
+    """
+    self.session.add(investor)
+
+  def delete_investor(self, investor_id):
+    investor = self.session.query(Investor).filter(Investor.id == investor_id).one()
+    if investor:
+      self.session.delete(investor)
 
   def instruments(self):
     """
@@ -105,6 +116,9 @@ class CoinfundDao(object):
       result = result.filter(Rate.base_curr == instr)
 
     return result
+
+  def commit(self):
+    self.session.commit()
 
   def close(self):
     """

@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-04 14:51:22
+# @Last Modified time: 2016-07-04 18:23:14
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
@@ -16,7 +16,6 @@ class Dispatcher(object):
 
   def dispatch(self, args):
     
-
     #
     # Investors
     #
@@ -27,9 +26,14 @@ class Dispatcher(object):
       #
       if args['add']:
         investor = self.cli.new_investor()
-        # TODO
-        print(investor)
+        self.dao.create_investor(investor)
 
+      elif args['delete']:
+        investor_id = args.get('--investor-id')
+        if investor_id:
+          self.dao.delete_investor(investor_id)
+        else:
+          print('Could not find investor id `%s`' % investor_id)
       #
       # List all investors
       #
@@ -76,6 +80,7 @@ class Dispatcher(object):
       items = self.dao.rates(instr=instr)
       self.fmt.print_list(items, Rate.__headers__, floatfmt='.8f')
 
+    self.dao.commit()
     self.dao.close()
 
 class Cli(object):
