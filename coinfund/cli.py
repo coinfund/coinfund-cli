@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-04 18:23:14
+# @Last Modified time: 2016-07-06 16:12:21
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
@@ -45,8 +45,21 @@ class Dispatcher(object):
     # Instruments
     #
     elif args['instruments']:
-      items = self.dao.instruments()
-      self.fmt.print_list(items, Instrument.__headers__)
+
+      if args['add']:
+        instrument = self.cli.new_instrument()
+        self.dao.create_instrument(instrument)
+
+      elif args['delete']:
+        instrument_id = args.get('--instrument-id')
+        if instrument_id:
+          self.dao.delete_instrument(instrument_id)
+        else:
+          print('Could not find instrument id `%s`' % instrument_id)
+      
+      else:
+        items = self.dao.instruments()
+        self.fmt.print_list(items, Instrument.__headers__)
 
     elif args['shares']:
       total = args.get('--total')
@@ -91,3 +104,9 @@ class Cli(object):
     email      = input('Email: ')
     investor = Investor(first_name=first_name, last_name=last_name, email=email)
     return investor
+
+  def new_instrument(self):
+    name       = input('Name: ')
+    symbol     = input('Symbol: ')
+    instrument = Instrument(name=name, symbol=symbol)
+    return instrument

@@ -13,6 +13,8 @@ Usage:
   cf investors add
   cf investors delete [--investor-id=<id>]
   cf instruments
+  cf instruments add
+  cf instruments delete [--instrument-id=<id>]
   cf shares [--investor-id=<id>] [--total]
   cf projects
   cf investments

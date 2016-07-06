@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-04 18:28:29
+# @Last Modified time: 2016-07-06 16:11:31
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric, func
@@ -11,6 +11,14 @@ from datetime import datetime
 
 # Base
 Base = declarative_base()
+
+#
+# Validations
+#
+
+def validate_exists(key, value):
+  assert value
+  return value
 
 class Investor(Base):
   """
@@ -36,8 +44,7 @@ class Investor(Base):
 
   @validates('first_name', 'last_name', 'email')
   def validate_exists(self, key, value):
-    assert value
-    return value
+    return validate_exists(key, value)
 
 class Instrument(Base):
   """
@@ -54,6 +61,10 @@ class Instrument(Base):
 
   def tabulate(self):
     return [self.id, self.name, self.symbol, self.created_at, self.updated_at]
+
+  @validates('name', 'symbol')
+  def validate_exists(self, key, value):
+    return validate_exists(key, value)
 
 class Share(Base):
   """

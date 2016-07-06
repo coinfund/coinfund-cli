@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-04 15:59:37
+# @Last Modified time: 2016-07-06 16:08:59
 
 from sqlalchemy import create_engine, desc, asc
 from sqlalchemy.orm import sessionmaker, joinedload
@@ -48,6 +48,19 @@ class CoinfundDao(object):
     Return a list of all Instruments.
     """
     return self.session.query(Instrument).order_by(asc('symbol'))
+
+  def create_instrument(self, instrument):
+    """
+    Create an instrument record.
+    """
+    self.session.add(instrument)
+
+  def delete_instrument(self, instrument_id):
+    instrument = self.session.query(Instrument).filter(Instrument.id == instrument_id).one()
+    if instrument:
+      self.session.delete(instrument)
+    else:
+      print('Could not find an instrument with id `%s`' % instrument)
 
   def shares(self, investor_id=None):
     """
