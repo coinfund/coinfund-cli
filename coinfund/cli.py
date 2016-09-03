@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-06 19:28:49
+# @Last Modified time: 2016-09-03 12:26:52
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
@@ -68,8 +68,15 @@ class Dispatcher(object):
 
       if args['add']:
         share = self.cli.new_share()
-        print(share)
+        self.dao.create_share(share)
 
+      elif args['delete']:
+        share_id = args.get('--share-id')
+        if share_id:
+          self.dao.delete_share(share_id)
+        else:
+          print('Could not find share id `%s`' % share_id)
+          
       else:
         total = args.get('--total')
         investor_id = args.get('--investor-id')
@@ -133,8 +140,10 @@ class Cli(object):
 
   def new_share(self):
     investor        = None
+    investor_id     = None
     investor_query  = input('Investor search: ')
     matches = self.dao.search_investor(investor_query).all()
+
     if not matches:
       print('Could not find investor matching `%s`. Try again.' % investor_query)
     elif len(matches) == 1:
@@ -143,4 +152,11 @@ class Cli(object):
     else:
       self.fmt.print_list(matches, Investor.__headers__)
       investor_id = input('Investor id: ')
+    
+    units = input('Units: ')
+    date_issued = input('Date issued [YYYY-MM-DD]: ')
+    if investor:
+      investor_id = investor.id
+    share = Share(investor_id=investor_id, units=units, date_issued=date_issued)
+    return share
       

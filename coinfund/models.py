@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-03 10:30:16
+# @Last Modified time: 2016-09-03 12:25:04
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric, func
@@ -74,17 +74,18 @@ class Share(Base):
   The share model.
   """
   __tablename__   = 'shares'
-  __headers__     = ['investor', 'units', 'created_at', 'updated_at']
+  __headers__     = ['id', 'investor', 'units', 'issued_date', 'created_at', 'updated_at']
 
   id              = Column(Integer, primary_key=True)
   investor_id     = Column(Integer, ForeignKey('investors.id'), nullable=False)
   investor        = relationship('Investor')
   units           = Column(Integer, nullable=False, default=0)
+  issued_date     = Column(DateTime, server_default=func.now())
   created_at      = Column(DateTime, server_default=func.now())
   updated_at      = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
 
   def tabulate(self):
-    return [self.investor.fullname(), self.units, self.created_at, self.updated_at]  
+    return [self.id, self.investor.fullname(), self.units, self.issued_date, self.created_at, self.updated_at]  
 
 class Project(Base):
   """
@@ -163,13 +164,14 @@ class Rate(Base):
   The rate model.
   """
   __tablename__   = 'convs'
-  __headers__     = ['date', 'base_curr', 'to_curr', 'rate']
+  __headers__     = ['date', 'base_curr', 'to_curr', 'rate', 'source']
 
   id              = Column(Integer, primary_key=True)
   date            = Column(DateTime)
   base_curr       = Column(String)
   to_curr         = Column(String)
   rate            = Column(Numeric)
+  source          = Column(String)
 
   def tabulate(self):
     return [self.date, self.base_curr, self.to_curr, self.rate]

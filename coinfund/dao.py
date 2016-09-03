@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-03 10:27:20
+# @Last Modified time: 2016-09-03 12:29:28
 
 from sqlalchemy import create_engine, desc, asc, or_
 from sqlalchemy.orm import sessionmaker, joinedload
@@ -77,11 +77,14 @@ class CoinfundDao(object):
     self.session.add(instrument)
 
   def delete_instrument(self, instrument_id):
+    """
+    Delete an instrument.
+    """
     instrument = self.session.query(Instrument).filter(Instrument.id == instrument_id).one()
     if instrument:
       self.session.delete(instrument)
     else:
-      print('Could not find an instrument with id `%s`' % instrument)
+      print('Could not find an instrument with id `%s`' % instrument_id)
 
   def shares(self, investor_id=None):
     """
@@ -95,6 +98,29 @@ class CoinfundDao(object):
       result = result.filter(Share.investor_id == investor_id)
 
     return result
+
+  def total_shares(self, investor_id=None):
+    """
+    Return total shares.
+    """
+    result = self.session.query(func.sum(Share.units))
+
+    if investor_id:
+      result =  result.filter(Share.investor_id == investor_id)
+    return result
+
+  def create_share(self, share):
+    """
+    Create a share entry.
+    """
+    self.session.add(share)
+
+  def delete_share(self, share_id=None):
+    share = self.session.query(Share).filter(Share.id == share_id).one()
+    if share:
+      self.session.delete(share)
+    else:
+      print('Could not find a share with id `%s`' % share_id)
 
   def projects(self):
     """
@@ -128,16 +154,6 @@ class CoinfundDao(object):
     result = self.session.query(Investment) \
                  .options(joinedload('investor')) \
                  .order_by(asc('date'))
-    return result
-
-  def total_shares(self, investor_id=None):
-    """
-    Return total shares.
-    """
-    result = self.session.query(func.sum(Share.units))
-
-    if investor_id:
-      result =  result.filter(Share.investor_id == investor_id)
     return result
 
   def rates(self, instr=None):
