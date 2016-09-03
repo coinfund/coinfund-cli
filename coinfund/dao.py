@@ -2,9 +2,9 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-06 16:08:59
+# @Last Modified time: 2016-07-06 19:30:14
 
-from sqlalchemy import create_engine, desc, asc
+from sqlalchemy import create_engine, desc, asc, or_
 from sqlalchemy.orm import sessionmaker, joinedload
 from coinfund.models import Investor, Instrument, Share, Project, Vehicle, Position, Investment, Rate
 from sqlalchemy.sql import func
@@ -12,10 +12,8 @@ from sqlalchemy.sql import func
 class CoinfundDao(object):
 
   def __init__(self, settings):
+    debug = settings.get('debug')
     self.settings = settings
-
-    debug = self.settings.get('debug')
-
     self.engine = create_engine(self.settings['database_uri'], echo=debug)
     self.Session = sessionmaker(bind=self.engine)
     self.session = self.Session()
@@ -25,6 +23,12 @@ class CoinfundDao(object):
     Return the settings for this DAO.
     """
     return self.settings
+
+  def investor(self, investor_id):
+    """
+    Get an investor by id.
+    """
+    return self.session.query(Investor).get(investor_id)
 
   def investors(self):
     """
@@ -42,6 +46,17 @@ class CoinfundDao(object):
     investor = self.session.query(Investor).filter(Investor.id == investor_id).one()
     if investor:
       self.session.delete(investor)
+
+  def search_investor(self, query):
+    query = query + '%'
+    matches = self.session.query(Investor).filter( \
+      or_( \
+        Investor.first_name.ilike(query), \
+        Investor.last_name.ilike(query), \
+        Investor.email.ilike(query) \
+      ) \
+    )
+    return matches
 
   def instruments(self):
     """
@@ -117,7 +132,6 @@ class CoinfundDao(object):
 
     if investor_id:
       result =  result.filter(Share.investor_id == investor_id)
-    
     return result
 
   def rates(self, instr=None):
@@ -127,7 +141,6 @@ class CoinfundDao(object):
     result = self.session.query(Rate).distinct('base_curr', 'to_curr').order_by(desc('base_curr'), desc('to_curr'), desc('date'))
     if instr:
       result = result.filter(Rate.base_curr == instr)
-
     return result
 
   def commit(self):

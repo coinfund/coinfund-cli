@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-06 16:11:31
+# @Last Modified time: 2016-07-06 19:15:28
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric, func
@@ -37,7 +37,7 @@ class Investor(Base):
   updated_at      = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
 
   def fullname(self):
-    return ' '.join([self.first_name, self.last_name])
+    return ' '.join([str(item) for item in [self.first_name, self.last_name]])
 
   def tabulate(self):
     return [self.id, self.first_name, self.last_name, self.email, self.updated_at, self.created_at]
@@ -45,6 +45,9 @@ class Investor(Base):
   @validates('first_name', 'last_name', 'email')
   def validate_exists(self, key, value):
     return validate_exists(key, value)
+
+  def __repr__(self):
+    return self.fullname()
 
 class Instrument(Base):
   """

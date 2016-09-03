@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-06 16:12:21
+# @Last Modified time: 2016-07-06 19:28:49
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
@@ -12,7 +12,7 @@ class Dispatcher(object):
   def __init__(self, dao):
     self.dao = dao
     self.fmt = Formatter()
-    self.cli = Cli()
+    self.cli = Cli(self.dao, self.fmt)
 
   def dispatch(self, args):
     
@@ -61,16 +61,25 @@ class Dispatcher(object):
         items = self.dao.instruments()
         self.fmt.print_list(items, Instrument.__headers__)
 
+    #
+    # Shares
+    #
     elif args['shares']:
-      total = args.get('--total')
-      investor_id = args.get('--investor-id')
-      
-      if total:
-        items = self.dao.total_shares(investor_id=investor_id)
-        self.fmt.print_result(items, ['total_shares'])
-      else:   
-        items = self.dao.shares(investor_id=investor_id)
-        self.fmt.print_list(items, Share.__headers__)
+
+      if args['add']:
+        share = self.cli.new_share()
+        print(share)
+
+      else:
+        total = args.get('--total')
+        investor_id = args.get('--investor-id')
+        
+        if total:
+          items = self.dao.total_shares(investor_id=investor_id)
+          self.fmt.print_result(items, ['total_shares'])
+        else:   
+          items = self.dao.shares(investor_id=investor_id)
+          self.fmt.print_list(items, Share.__headers__)
 
     elif args['projects']:
       items = self.dao.projects()
@@ -98,6 +107,17 @@ class Dispatcher(object):
 
 class Cli(object):
 
+  """
+  Cli implements a command line interface for taking
+  command line input for business objects.
+  """
+
+  def __init__(self, dao, fmt):
+    """
+    """
+    self.dao = dao
+    self.fmt = fmt
+
   def new_investor(self):
     first_name = input('First name: ')
     last_name  = input('Last name: ')
@@ -110,3 +130,17 @@ class Cli(object):
     symbol     = input('Symbol: ')
     instrument = Instrument(name=name, symbol=symbol)
     return instrument
+
+  def new_share(self):
+    investor        = None
+    investor_query  = input('Investor search: ')
+    matches = self.dao.search_investor(investor_query).all()
+    if not matches:
+      print('Could not find investor matching `%s`. Try again.' % investor_query)
+    elif len(matches) == 1:
+      investor = matches[0]
+      print(investor)
+    else:
+      self.fmt.print_list(matches, Investor.__headers__)
+      investor_id = input('Investor id: ')
+      
