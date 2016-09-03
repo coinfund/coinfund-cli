@@ -2,10 +2,11 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-03 12:26:52
+# @Last Modified time: 2016-09-03 12:57:43
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
+import datetime
 
 class Dispatcher(object):
 
@@ -76,12 +77,16 @@ class Dispatcher(object):
           self.dao.delete_share(share_id)
         else:
           print('Could not find share id `%s`' % share_id)
-          
+
       else:
         total = args.get('--total')
-        investor_id = args.get('--investor-id')
+        investor_id = None
         
         if total:
+          if args.get('--investor'):
+            investor = self.cli.search_investor()
+            if investor:
+              investor_id = investor.id          
           items = self.dao.total_shares(investor_id=investor_id)
           self.fmt.print_result(items, ['total_shares'])
         else:   
@@ -138,25 +143,35 @@ class Cli(object):
     instrument = Instrument(name=name, symbol=symbol)
     return instrument
 
-  def new_share(self):
-    investor        = None
-    investor_id     = None
-    investor_query  = input('Investor search: ')
-    matches = self.dao.search_investor(investor_query).all()
+  def search_investor(self):
+    investor_query = input('Investor search: ')
+    matches        = self.dao.search_investor(investor_query).all()
 
     if not matches:
       print('Could not find investor matching `%s`. Try again.' % investor_query)
+
     elif len(matches) == 1:
       investor = matches[0]
-      print(investor)
-    else:
+      print('-> %s' % investor)
+      return investor
+
+    elif len(matches) > 1:
       self.fmt.print_list(matches, Investor.__headers__)
       investor_id = input('Investor id: ')
+      investor = None
+      for match in matches:
+        if match.id == investor_id:
+          return match
+    
+  def new_share(self):
+    investor = self.search_investor()
+
+    if not investor:
+      raise Exception('Could not find investor record.')
     
     units = input('Units: ')
-    date_issued = input('Date issued [YYYY-MM-DD]: ')
-    if investor:
-      investor_id = investor.id
-    share = Share(investor_id=investor_id, units=units, date_issued=date_issued)
+    issued_date = input('Date issued [YYYY-MM-DD]: ')
+    
+    share = Share(investor_id=investor.id, units=units, issued_date=(issued_date or None))
     return share
       
