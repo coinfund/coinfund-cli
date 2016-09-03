@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-03 13:08:44
+# @Last Modified time: 2016-09-03 13:14:01
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
@@ -91,10 +91,11 @@ class Dispatcher(object):
           items = self.dao.total_shares(investor_id=investor_id)
           self.fmt.print_result(items, ['total_shares'])
 
-        elif investor_only:  
-          investor = self.cli.search_investor() 
-          if investor:
-            investor_id = investor.id
+        else:
+          if investor_only: 
+            investor = self.cli.search_investor() 
+            if investor:
+              investor_id = investor.id
           items = self.dao.shares(investor_id=investor_id)
           self.fmt.print_list(items, Share.__headers__)
 
