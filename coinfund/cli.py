@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-03 17:10:20
+# @Last Modified time: 2016-09-03 17:14:09
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
@@ -118,8 +118,12 @@ class Dispatcher(object):
           print('Could not find entry id `%s`.' % entry_id)
 
       elif args['contributions']:
-        items = self.dao.total_ledger_contributions()
+        items = self.dao.total_ledger('Contribution')
         self.fmt.print_result(items, ['total_ledger_contributions'])
+
+      elif args['expenses']:
+        items = self.dao.total_ledger('Expense')
+        self.fmt.print_result(items, ['total_ledger_expenses'])
 
       else:
         items = self.dao.ledger()
