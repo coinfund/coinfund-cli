@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-03 12:25:04
+# @Last Modified time: 2016-09-03 15:52:11
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric, func
@@ -80,8 +80,8 @@ class Share(Base):
   investor_id     = Column(Integer, ForeignKey('investors.id'), nullable=False)
   investor        = relationship('Investor')
   units           = Column(Integer, nullable=False, default=0)
-  issued_date     = Column(DateTime, server_default=func.now())
-  created_at      = Column(DateTime, server_default=func.now())
+  issued_date     = Column(DateTime)
+  created_at      = Column(DateTime)
   updated_at      = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
 
   def tabulate(self):
@@ -125,53 +125,46 @@ class Vehicle(Base):
     return [self.name, self.instrument.symbol, self.project.homepage, self.project.description]
 
 
-class Position(Base):
+class Ledger(Base):
   """
-  The position model.
+  The ledger model.
   """
-  __tablename__ = 'positions'
-  __headers__   = ['date', 'vehicle', 'position', 'currency']
-
-  id            = Column(Integer, primary_key=True)
-  date          = Column(DateTime)
-  vehicle_id    = Column(Integer, ForeignKey('vehicles.id'))
-  vehicle       = relationship('Vehicle')
-  position      = Column(Numeric)
-
-  def tabulate(self):
-    return [self.date, self.vehicle.name, self.position, self.vehicle.currency]
-
-class Investment(Base):
-  """
-  The investment model.
-  """
-  __tablename__   = 'investments'
-  __headers__     = ['date', 'investor', 'kind', 'cost_basis_btc', 'cost_basis_usd']
+  __tablename__   = 'ledger'
+  __headers__     = ['id', 'date', 'kind', 'subkind', 'usd_value', 'qty_in', 'instr_in', 'qty_out', 'instr_out', 'contributor', 'venue', 'vendor', 'tx_info', 'notes']
 
   id              = Column(Integer, primary_key=True)
-  date            = Column(DateTime)
-  investor_id     = Column(Integer, ForeignKey('investors.id'))
-  investor        = relationship('Investor')
-  kind            = Column(String)
-  cost_basis_btc  = Column(Numeric)
-  cost_basis_usd  = Column(Numeric)
+  date            = Column(DateTime, nullable=False, server_default=func.now())
+  kind            = Column(String, nullable=False)
+  subkind         = Column(String)
+  usd_value       = Column(Numeric)
+  qty_in          = Column(Numeric)
+  instr_in_id     = Column(Integer, ForeignKey('instruments.id'))
+  instr_in        = relationship(Instrument, foreign_keys='Ledger.instr_in_id')
+  qty_out         = Column(Numeric)
+  instr_out_id    = Column(Integer, ForeignKey('instruments.id'))
+  instr_out       = relationship(Instrument, foreign_keys='Ledger.instr_out_id') 
+  contributor_id  = Column(Integer, ForeignKey('investors.id'))
+  contributor     = relationship(Investor)
+  venue           = Column(String)
+  vendor          = Column(String)
+  tx_info         = Column(String)
+  notes           = Column(String)
+
+  @validates('kind')
+  def validate_exists(self, key, value):
+    return validate_exists(key, value)
 
   def tabulate(self):
-    return [self.date, self.investor.fullname(), self.kind, self.cost_basis_btc, self.cost_basis_usd]
+    instr_in = None
+    instr_out = None
+    contributor = None
+    if self.instr_in:
+      instr_in = self.instr_in.symbol
+    if self.instr_out:
+      instr_out = self.instr_out.symbol
+    if self.contributor:
+      contributor = self.contributor.fullname()
 
-class Rate(Base):
-  """
-  The rate model.
-  """
-  __tablename__   = 'convs'
-  __headers__     = ['date', 'base_curr', 'to_curr', 'rate', 'source']
-
-  id              = Column(Integer, primary_key=True)
-  date            = Column(DateTime)
-  base_curr       = Column(String)
-  to_curr         = Column(String)
-  rate            = Column(Numeric)
-  source          = Column(String)
-
-  def tabulate(self):
-    return [self.date, self.base_curr, self.to_curr, self.rate]
+    return [self.id, self.date.date(), self.kind, self.subkind, self.usd_value, self.qty_in, instr_in , self.qty_out, instr_out, \
+      contributor, self.venue, self.vendor, self.tx_info, self.notes
+    ]

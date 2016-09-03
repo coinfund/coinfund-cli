@@ -2,11 +2,11 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-03 12:29:28
+# @Last Modified time: 2016-09-03 15:29:31
 
 from sqlalchemy import create_engine, desc, asc, or_
 from sqlalchemy.orm import sessionmaker, joinedload
-from coinfund.models import Investor, Instrument, Share, Project, Vehicle, Position, Investment, Rate
+from coinfund.models import Investor, Instrument, Share, Project, Vehicle, Ledger
 from sqlalchemy.sql import func
 
 class CoinfundDao(object):
@@ -86,6 +86,19 @@ class CoinfundDao(object):
     else:
       print('Could not find an instrument with id `%s`' % instrument_id)
 
+  def search_instrument(self, query):
+    """
+    Search for an instrument by name or symbol.
+    """
+    query = query + '%'
+    matches = self.session.query(Instrument).filter( \
+      or_( \
+        Instrument.name.ilike(query), \
+        Instrument.symbol.ilike(query) \
+      ) \
+    )
+    return matches
+
   def shares(self, investor_id=None):
     """
     Return a list of all Shares.
@@ -122,6 +135,28 @@ class CoinfundDao(object):
     else:
       print('Could not find a share with id `%s`' % share_id)
 
+  def ledger(self):
+    """
+    Return ledger entries.
+    """
+    return self.session.query(Ledger).order_by(Ledger.date)
+
+  def create_ledger_entry(self, ledger_entry):
+    """
+    Create a ledger entry.
+    """
+    self.session.add(ledger_entry)
+
+  def delete_ledger_entry(self, entry_id):
+    """
+    Delete a ledger entry.
+    """
+    ledger_entry = self.session.query(Ledger).filter(Ledger.id == entry_id).one()
+    if ledger_entry:
+      self.session.delete(ledger_entry)
+    else:
+      print('Could not find a ledger entry with id `%s`' % entry_id)
+
   def projects(self):
     """
     Return a list of all Projects.
@@ -135,35 +170,35 @@ class CoinfundDao(object):
     """
     return self.session.query(Vehicle).options(joinedload('instrument'), joinedload('project'))
 
-  ### OLD
+  # ### OLD
 
-  def positions(self):
-    """
-    Return a list of all Positions.
-    """
-    result = self.session.query(Position) \
-                  .options(joinedload('vehicle')) \
-                  .distinct('vehicle_id') \
-                  .order_by(desc('vehicle_id'), desc('date'))
-    return result
+  # def positions(self):
+  #   """
+  #   Return a list of all Positions.
+  #   """
+  #   result = self.session.query(Position) \
+  #                 .options(joinedload('vehicle')) \
+  #                 .distinct('vehicle_id') \
+  #                 .order_by(desc('vehicle_id'), desc('date'))
+  #   return result
 
-  def investments(self):
-    """
-    Return a list of all Investments.
-    """
-    result = self.session.query(Investment) \
-                 .options(joinedload('investor')) \
-                 .order_by(asc('date'))
-    return result
+  # def investments(self):
+  #   """
+  #   Return a list of all Investments.
+  #   """
+  #   result = self.session.query(Investment) \
+  #                .options(joinedload('investor')) \
+  #                .order_by(asc('date'))
+  #   return result
 
-  def rates(self, instr=None):
-    """
-    Return latest rates.
-    """
-    result = self.session.query(Rate).distinct('base_curr', 'to_curr').order_by(desc('base_curr'), desc('to_curr'), desc('date'))
-    if instr:
-      result = result.filter(Rate.base_curr == instr)
-    return result
+  # def rates(self, instr=None):
+  #   """
+  #   Return latest rates.
+  #   """
+  #   result = self.session.query(Rate).distinct('base_curr', 'to_curr').order_by(desc('base_curr'), desc('to_curr'), desc('date'))
+  #   if instr:
+  #     result = result.filter(Rate.base_curr == instr)
+  #   return result
 
   def commit(self):
     self.session.commit()

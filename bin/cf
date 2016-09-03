@@ -19,10 +19,10 @@ Usage:
   cf shares add
   cf shares delete [--share-id=<id>]
   cf projects
-  cf investments
   cf vehicles
-  cf positions
-  cf rates [--instr=<instr>]
+  cf ledger
+  cf ledger add
+  cf ledger delete [--entry-id=<id>]
 
 Options:
   -h --help     Show this screen.
