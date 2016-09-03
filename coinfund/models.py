@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-06 19:15:28
+# @Last Modified time: 2016-09-03 10:30:16
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric, func
@@ -24,8 +24,8 @@ class Investor(Base):
   """
   The investor model.
   """
-  __tablename__ = 'investors'
-  __headers__ = ['id', 'first_name', 'last_name', 'email', 'updated_at', 'created_at']
+  __tablename__   = 'investors'
+  __headers__     = ['id', 'first_name', 'last_name', 'email', 'updated_at', 'created_at']
 
   id              = Column(Integer, primary_key=True)
   first_name      = Column(String, nullable=False)
@@ -73,8 +73,8 @@ class Share(Base):
   """
   The share model.
   """
-  __tablename__ = 'shares'
-  __headers__   = ['investor', 'units', 'created_at', 'updated_at']
+  __tablename__   = 'shares'
+  __headers__     = ['investor', 'units', 'created_at', 'updated_at']
 
   id              = Column(Integer, primary_key=True)
   investor_id     = Column(Integer, ForeignKey('investors.id'), nullable=False)
@@ -90,8 +90,8 @@ class Project(Base):
   """
   The project model.
   """
-  __tablename__ = 'projects'
-  __headers__    = ['name', 'homepage', 'description', 'created_at', 'updated_at']
+  __tablename__   = 'projects'
+  __headers__     = ['name', 'homepage', 'description', 'created_at', 'updated_at']
 
   id              = Column(Integer, primary_key=True)
   name            = Column(String, nullable=False)
@@ -144,8 +144,8 @@ class Investment(Base):
   """
   The investment model.
   """
-  __tablename__ = 'investments'
-  __headers__   = ['date', 'investor', 'kind', 'cost_basis_btc', 'cost_basis_usd']
+  __tablename__   = 'investments'
+  __headers__     = ['date', 'investor', 'kind', 'cost_basis_btc', 'cost_basis_usd']
 
   id              = Column(Integer, primary_key=True)
   date            = Column(DateTime)

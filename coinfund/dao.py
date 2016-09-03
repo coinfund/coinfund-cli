@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-07-06 19:30:14
+# @Last Modified time: 2016-09-03 10:27:20
 
 from sqlalchemy import create_engine, desc, asc, or_
 from sqlalchemy.orm import sessionmaker, joinedload
@@ -43,11 +43,17 @@ class CoinfundDao(object):
     self.session.add(investor)
 
   def delete_investor(self, investor_id):
+    """
+    Delete an investor record.
+    """
     investor = self.session.query(Investor).filter(Investor.id == investor_id).one()
     if investor:
       self.session.delete(investor)
 
   def search_investor(self, query):
+    """
+    Search for an investor by name or email.
+    """
     query = query + '%'
     matches = self.session.query(Investor).filter( \
       or_( \
