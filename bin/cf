@@ -15,7 +15,7 @@ Usage:
   cf instruments
   cf instruments add
   cf instruments delete [--instrument-id=<id>]
-  cf shares [--investor-id=<id>] [--investor] [--total]
+  cf shares [--investor] [--total]
   cf shares add
   cf shares delete [--share-id=<id>]
   cf projects
