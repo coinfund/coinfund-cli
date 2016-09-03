@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-03 15:54:37
+# @Last Modified time: 2016-09-03 17:10:20
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
@@ -110,12 +110,16 @@ class Dispatcher(object):
         ledger_entry = self.cli.new_ledger_entry()
         self.dao.create_ledger_entry(ledger_entry)
 
-      if args['delete']:
+      elif args['delete']:
         entry_id = args.get('--entry-id')
         if entry_id:
           self.dao.delete_ledger_entry(entry_id)
         else:
           print('Could not find entry id `%s`.' % entry_id)
+
+      elif args['contributions']:
+        items = self.dao.total_ledger_contributions()
+        self.fmt.print_result(items, ['total_ledger_contributions'])
 
       else:
         items = self.dao.ledger()
@@ -168,13 +172,21 @@ class Cli(object):
     return instrument
 
   def new_ledger_entry(self):
-    date          = input('Date [YYYY-MM-DD]: ')
+    date          = input('Date [YYYY-MM-DD]: ') or None
     kind          = input('Kind: ')
+    subkind       = None
     qty_in        = None
     instr_in      = None
     qty_out       = None
     instr_out     = None
     contributor   = None
+    venue         = None
+    vendor        = None
+    tx_info       = None
+    notes         = None
+
+    if date:
+      date = datetime.datetime.strptime(date, "%Y-%m-%d")    
 
     if kind == 'Expense':
       subkind       = input('Subkind: ') or None

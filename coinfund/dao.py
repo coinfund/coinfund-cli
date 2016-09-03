@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-03 15:29:31
+# @Last Modified time: 2016-09-03 17:06:41
 
 from sqlalchemy import create_engine, desc, asc, or_
 from sqlalchemy.orm import sessionmaker, joinedload
@@ -156,6 +156,13 @@ class CoinfundDao(object):
       self.session.delete(ledger_entry)
     else:
       print('Could not find a ledger entry with id `%s`' % entry_id)
+
+  def total_ledger_contributions(self):
+    """
+    Return total shares.
+    """
+    result = self.session.query(func.sum(Ledger.usd_value)).filter(Ledger.kind == 'Contribution')
+    return result
 
   def projects(self):
     """

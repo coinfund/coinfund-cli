@@ -23,6 +23,8 @@ Usage:
   cf ledger
   cf ledger add
   cf ledger delete [--entry-id=<id>]
+  cf ledger contributions
+  cf ledger expenses
 
 Options:
   -h --help     Show this screen.
