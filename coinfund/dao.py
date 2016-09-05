@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-05 14:00:08
+# @Last Modified time: 2016-09-05 17:15:03
 
 from sqlalchemy import create_engine, desc, asc, or_
 from sqlalchemy.orm import sessionmaker, joinedload
@@ -17,6 +17,8 @@ class CoinfundDao(object):
     self.engine = create_engine(self.settings['database_uri'], echo=debug)
     self.Session = sessionmaker(bind=self.engine)
     self.session = self.Session()
+    self.instr_cache = {}
+    self.vehicle_cache = {}
 
   def settings(self):
     """
@@ -64,6 +66,17 @@ class CoinfundDao(object):
     )
     return matches
 
+  def investor_by_name(self, fullname):
+    """
+    Search for an investor by full name.
+    """
+    match = self.session.query(Investor).filter(
+      Investor.fullname == fullname
+    ).one()
+    if not match:
+      raise Exception('Could not find investor for `%s`' % fullname)
+    return match
+
   def instruments(self):
     """
     Return a list of all Instruments.
@@ -98,6 +111,17 @@ class CoinfundDao(object):
       ) \
     )
     return matches
+
+  def instrument_by_symbol(self, symbol):
+    if symbol in self.instr_cache:
+      return self.instr_cache[symbol]
+    else:
+      match = self.session.query(Instrument).filter(Instrument.symbol == symbol).one()
+      if match:
+        self.instr_cache[symbol] = match
+        return match
+      else:
+        raise Exception('Could not find instrument for symbol `%s`' % symbol)
 
   def shares(self, investor_id=None):
     """
@@ -135,11 +159,20 @@ class CoinfundDao(object):
     else:
       print('Could not find a share with id `%s`' % share_id)
 
-  def ledger(self):
+  def ledger(self, kind=None, startdate=None, enddate=None):
     """
     Return ledger entries.
     """
-    return self.session.query(Ledger).order_by(Ledger.date)
+    result = self.session.query(Ledger).order_by(Ledger.date)
+
+    if kind:
+      result = result.filter(Ledger.kind == kind)
+    if startdate:
+      result = result.filter(Ledger.date >= startdate)
+    if enddate:
+      result = result.filter(Ledger.date <= enddate)
+
+    return result
 
   def create_ledger_entry(self, ledger_entry):
     """
@@ -157,11 +190,18 @@ class CoinfundDao(object):
     else:
       print('Could not find a ledger entry with id `%s`' % entry_id)
 
-  def total_ledger(self, kind):
+  def total_ledger(self, kind, startdate=None, enddate=None):
     """
     Return total ledger usd values.
     """
     result = self.session.query(func.sum(Ledger.usd_value)).filter(Ledger.kind == kind)
+
+    if startdate:
+      result = result.filter(Ledger.date >= startdate)
+
+    if enddate:
+      result = result.filter(Ledger.date <= enddate)
+
     return result
 
 
@@ -204,35 +244,16 @@ class CoinfundDao(object):
     )
     return matches
 
-  # ### OLD
-
-  # def positions(self):
-  #   """
-  #   Return a list of all Positions.
-  #   """
-  #   result = self.session.query(Position) \
-  #                 .options(joinedload('vehicle')) \
-  #                 .distinct('vehicle_id') \
-  #                 .order_by(desc('vehicle_id'), desc('date'))
-  #   return result
-
-  # def investments(self):
-  #   """
-  #   Return a list of all Investments.
-  #   """
-  #   result = self.session.query(Investment) \
-  #                .options(joinedload('investor')) \
-  #                .order_by(asc('date'))
-  #   return result
-
-  # def rates(self, instr=None):
-  #   """
-  #   Return latest rates.
-  #   """
-  #   result = self.session.query(Rate).distinct('base_curr', 'to_curr').order_by(desc('base_curr'), desc('to_curr'), desc('date'))
-  #   if instr:
-  #     result = result.filter(Rate.base_curr == instr)
-  #   return result
+  def vehicle_by_name(self, name):
+    if name in self.vehicle_cache:
+      return self.vehicle_cache[name]
+    else:
+      match = self.session.query(Vehicle).filter(Vehicle.name == name).one()
+      if match:
+        self.vehicle_cache[name] = match
+        return match
+      else:
+        raise Exception('Could not find vehicle with name `%s`' % name)
 
   def commit(self):
     self.session.commit()

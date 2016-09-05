@@ -33,7 +33,7 @@ def upgrade():
     sa.Column('qty_out', sa.Numeric),
     sa.Column('instr_out_id', sa.Integer, sa.ForeignKey('instruments.id')),
     sa.Column('contributor_id', sa.Integer, sa.ForeignKey('investors.id')),
-    sa.Column('venue', sa.String(50)),
+    sa.Column('venue', sa.String(256)),
     sa.Column('vendor', sa.String(50)),
     sa.Column('tx_info', sa.String(256)),
     sa.Column('notes', sa.String(1024)),

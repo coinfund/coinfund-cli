@@ -2,10 +2,11 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-05 14:02:11
+# @Last Modified time: 2016-09-05 17:18:24
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
+from coinfund.importer import Importer
 import datetime
 
 class Dispatcher(object):
@@ -106,6 +107,10 @@ class Dispatcher(object):
     #
     elif args['ledger']:
 
+      startdate = args.get('--startdate')
+      enddate   = args.get('--enddate')
+      total     = args.get('--total')
+
       if args['add']:
         ledger_entry = self.cli.new_ledger_entry()
         self.dao.create_ledger_entry(ledger_entry)
@@ -122,15 +127,27 @@ class Dispatcher(object):
           print('Could not find entry id `%s`.' % entry_id)
 
       elif args['contributions']:
-        items = self.dao.total_ledger('Contribution')
+        items = self.dao.total_ledger('Contribution', startdate=startdate, enddate=enddate)
         self.fmt.print_result(items, ['total_ledger_contributions'])
 
       elif args['expenses']:
-        items = self.dao.total_ledger('Expense')
-        self.fmt.print_result(items, ['total_ledger_expenses'])
+        if total:
+          items = self.dao.total_ledger('Expense', startdate=startdate, enddate=enddate)
+          self.fmt.print_result(items, ['total_ledger_expenses'])
+        else:
+          items = self.dao.ledger(kind='Expense', startdate=startdate, enddate=enddate)
+          self.fmt.print_list(items, Ledger.__headers__)
+
+      elif args['import']:
+        ledger_file = args.get('--file')
+        if not ledger_file:
+          raise Exception('Please specify --file.')
+
+        importer = Importer(self.dao)
+        importer.import_ledger(ledger_file)
 
       else:
-        items = self.dao.ledger()
+        items = self.dao.ledger(startdate=startdate, enddate=enddate)
         self.fmt.print_list(items, Ledger.__headers__)
 
     elif args['projects']:

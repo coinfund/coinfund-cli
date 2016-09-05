@@ -2,11 +2,12 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-05 13:52:28
+# @Last Modified time: 2016-09-05 16:58:41
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric, func, Boolean
-from sqlalchemy.orm import relationship, validates
+from sqlalchemy.orm import relationship, validates, column_property
+# from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime
 
 # Base
@@ -30,14 +31,16 @@ class Investor(Base):
   id              = Column(Integer, primary_key=True)
   first_name      = Column(String, nullable=False)
   last_name       = Column(String, nullable=False)
+  fullname        = column_property(first_name + ' ' + last_name)
   email           = Column(String, nullable=False, unique=True)
   password_digest = Column(String)
   access_token    = Column(String)
   created_at      = Column(DateTime, server_default=func.now())
   updated_at      = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
 
-  def fullname(self):
-    return ' '.join([str(item) for item in [self.first_name, self.last_name]])
+  # @hybrid_property
+  # def fullname(self):
+  #   return ' '.join([str(item) for item in [self.first_name, self.last_name]])
 
   def tabulate(self):
     return [self.id, self.first_name, self.last_name, self.email, self.updated_at, self.created_at]
@@ -47,7 +50,7 @@ class Investor(Base):
     return validate_exists(key, value)
 
   def __repr__(self):
-    return self.fullname()
+    return self.fullname
 
 class Instrument(Base):
   """
@@ -85,7 +88,7 @@ class Share(Base):
   updated_at      = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
 
   def tabulate(self):
-    return [self.id, self.investor.fullname(), self.units, self.issued_date, self.created_at, self.updated_at]  
+    return [self.id, self.investor.fullname, self.units, self.issued_date, self.created_at, self.updated_at]  
 
 class Project(Base):
   """
@@ -135,7 +138,8 @@ class Ledger(Base):
   The ledger model.
   """
   __tablename__   = 'ledger'
-  __headers__     = ['id', 'vehicle', 'date', 'kind', 'subkind', 'usd_value', 'qty_in', 'instr_in', 'qty_out', 'instr_out', 'contributor', 'venue', 'vendor', 'tx_info', 'notes']
+  __headers__     = ['id', 'vehicle', 'date', 'kind', 'usd_value', 'qty_in', 'instr_in', 'qty_out', 'instr_out', 
+  'contributor', 'vendor', 'tx_info', 'notes']
 
   id              = Column(Integer, primary_key=True)
   date            = Column(DateTime, nullable=False, server_default=func.now())
@@ -164,19 +168,31 @@ class Ledger(Base):
     return validate_exists(key, value)
 
   def tabulate(self):
-    instr_in = None
-    instr_out = None
+    instr_in    = None
+    instr_out   = None
     contributor = None
-    vehicle = None
+    vehicle     = None
+    tx_info     = None
+    notes       = None
+
     if self.instr_in:
       instr_in = self.instr_in.symbol
+    
     if self.instr_out:
       instr_out = self.instr_out.symbol
+    
     if self.contributor:
-      contributor = self.contributor.fullname()
+      contributor = self.contributor.fullname
+    
     if self.vehicle:
-      vehicle = vehicle.name
+      vehicle = self.vehicle.name
+    
+    if self.tx_info:
+      tx_info = self.tx_info[:25]
+    
+    if self.notes:
+      notes = self.notes[:30]
 
-    return [self.id, vehicle, self.date.date(), self.kind, self.subkind, self.usd_value, self.qty_in, instr_in , self.qty_out, instr_out, \
-      contributor, self.venue, self.vendor, self.tx_info[:25], self.notes[:30]
+    return [self.id, vehicle, self.date.date(), self.kind, self.usd_value, self.qty_in, instr_in , self.qty_out, instr_out, \
+      contributor, self.vendor, tx_info, notes
     ]

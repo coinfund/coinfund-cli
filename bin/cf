@@ -22,11 +22,12 @@ Usage:
   cf vehicles
   cf vehicles add
   cf vehicles delete [--vehicle-id=<id>]
-  cf ledger
+  cf ledger [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>]
+  cf ledger import [--file=<file>]
   cf ledger add
   cf ledger delete [--entry-id=<id>]
   cf ledger contributions
-  cf ledger expenses
+  cf ledger expenses [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>] [--total]
 
 Options:
   -h --help     Show this screen.
@@ -88,10 +89,10 @@ def main(args):
   """
   dao = CoinfundDao(SETTINGS)
   dispatcher = Dispatcher(dao)
-  try:
-    dispatcher.dispatch(args)
-  except Exception as e:
-    print(e)
+  #try:
+  dispatcher.dispatch(args)
+  #except Exception as e:
+  #  print(e)
 
 if __name__ == '__main__':
 
