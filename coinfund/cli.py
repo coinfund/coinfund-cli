@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-05 17:18:24
+# @Last Modified time: 2016-09-05 17:24:27
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
@@ -107,6 +107,7 @@ class Dispatcher(object):
     #
     elif args['ledger']:
 
+      kind      = args.get('--kind')
       startdate = args.get('--startdate')
       enddate   = args.get('--enddate')
       total     = args.get('--total')
@@ -127,8 +128,12 @@ class Dispatcher(object):
           print('Could not find entry id `%s`.' % entry_id)
 
       elif args['contributions']:
-        items = self.dao.total_ledger('Contribution', startdate=startdate, enddate=enddate)
-        self.fmt.print_result(items, ['total_ledger_contributions'])
+        if total:
+          items = self.dao.total_ledger('Contribution', startdate=startdate, enddate=enddate)
+          self.fmt.print_result(items, ['total_ledger_contributions'])
+        else:
+          items = self.dao.ledger(kind='Contribution', startdate=startdate, enddate=enddate)
+          self.fmt.print_list(items, Ledger.__headers__)
 
       elif args['expenses']:
         if total:
@@ -147,7 +152,7 @@ class Dispatcher(object):
         importer.import_ledger(ledger_file)
 
       else:
-        items = self.dao.ledger(startdate=startdate, enddate=enddate)
+        items = self.dao.ledger(kind=kind, startdate=startdate, enddate=enddate)
         self.fmt.print_list(items, Ledger.__headers__)
 
     elif args['projects']:
