@@ -16,7 +16,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import ENUM
 
-kind_enum_values    = ('Contribution', 'Expense', 'Trade', 'Income', 'Reimbursement', 'Interest')
+kind_enum_values    = ('Contribution', 'Expense', 'Trade', 'Income', 'Reimbursement', 'Interest', 'Distribution', 'Gift')
 kind_enum           = ENUM(*kind_enum_values, name='kind', create_type=False)
 
 def upgrade():
@@ -37,6 +37,9 @@ def upgrade():
     sa.Column('vendor', sa.String(50)),
     sa.Column('tx_info', sa.String(256)),
     sa.Column('notes', sa.String(1024)),
+    sa.Column('settled', sa.Boolean, nullable=False, default=True),
+    sa.Column('source', sa.String(64)),
+    sa.Column('vehicle_id', sa.Integer, sa.ForeignKey('vehicles.id')),
     sa.Column('created_at', sa.DateTime, server_default=sa.func.now()),
     sa.Column('updated_at', sa.DateTime, server_default=sa.func.now(), server_onupdate=sa.func.now())
   )

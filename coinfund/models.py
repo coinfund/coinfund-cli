@@ -2,10 +2,10 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-03 15:52:11
+# @Last Modified time: 2016-09-05 13:52:28
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric, func
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric, func, Boolean
 from sqlalchemy.orm import relationship, validates
 from datetime import datetime
 
@@ -122,7 +122,12 @@ class Vehicle(Base):
   updated_at      = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
 
   def tabulate(self):
-    return [self.name, self.instrument.symbol, self.project.homepage, self.project.description]
+    homepage = None
+    description = None
+    if self.project:
+      homepage = self.project.homepage
+      description = self.project.description
+    return [self.name, self.instrument.symbol, homepage, description]
 
 
 class Ledger(Base):
@@ -130,7 +135,7 @@ class Ledger(Base):
   The ledger model.
   """
   __tablename__   = 'ledger'
-  __headers__     = ['id', 'date', 'kind', 'subkind', 'usd_value', 'qty_in', 'instr_in', 'qty_out', 'instr_out', 'contributor', 'venue', 'vendor', 'tx_info', 'notes']
+  __headers__     = ['id', 'vehicle', 'date', 'kind', 'subkind', 'usd_value', 'qty_in', 'instr_in', 'qty_out', 'instr_out', 'contributor', 'venue', 'vendor', 'tx_info', 'notes']
 
   id              = Column(Integer, primary_key=True)
   date            = Column(DateTime, nullable=False, server_default=func.now())
@@ -148,6 +153,10 @@ class Ledger(Base):
   venue           = Column(String)
   vendor          = Column(String)
   tx_info         = Column(String)
+  settled         = Column(Boolean)
+  source          = Column(String)
+  vehicle_id      = Column(Integer, ForeignKey('vehicles.id'))
+  vehicle         = relationship(Vehicle)
   notes           = Column(String)
 
   @validates('kind')
@@ -158,13 +167,16 @@ class Ledger(Base):
     instr_in = None
     instr_out = None
     contributor = None
+    vehicle = None
     if self.instr_in:
       instr_in = self.instr_in.symbol
     if self.instr_out:
       instr_out = self.instr_out.symbol
     if self.contributor:
       contributor = self.contributor.fullname()
+    if self.vehicle:
+      vehicle = vehicle.name
 
-    return [self.id, self.date.date(), self.kind, self.subkind, self.usd_value, self.qty_in, instr_in , self.qty_out, instr_out, \
-      contributor, self.venue, self.vendor, self.tx_info, self.notes
+    return [self.id, vehicle, self.date.date(), self.kind, self.subkind, self.usd_value, self.qty_in, instr_in , self.qty_out, instr_out, \
+      contributor, self.venue, self.vendor, self.tx_info[:25], self.notes[:30]
     ]

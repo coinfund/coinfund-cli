@@ -20,6 +20,8 @@ Usage:
   cf shares delete [--share-id=<id>]
   cf projects
   cf vehicles
+  cf vehicles add
+  cf vehicles delete [--vehicle-id=<id>]
   cf ledger
   cf ledger add
   cf ledger delete [--entry-id=<id>]
@@ -86,7 +88,10 @@ def main(args):
   """
   dao = CoinfundDao(SETTINGS)
   dispatcher = Dispatcher(dao)
-  dispatcher.dispatch(args)
+  try:
+    dispatcher.dispatch(args)
+  except Exception as e:
+    print(e)
 
 if __name__ == '__main__':
 

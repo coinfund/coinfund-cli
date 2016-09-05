@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-03 17:12:35
+# @Last Modified time: 2016-09-05 14:00:08
 
 from sqlalchemy import create_engine, desc, asc, or_
 from sqlalchemy.orm import sessionmaker, joinedload
@@ -177,6 +177,32 @@ class CoinfundDao(object):
     Return a list of all Vehicles.
     """
     return self.session.query(Vehicle).options(joinedload('instrument'), joinedload('project'))
+
+  def create_vehicle(self, vehicle):
+    """
+    Create a new vehicle.
+    """
+    self.session.add(vehicle)
+
+  def delete_vehicle(self, vehicle_id):
+    """
+    Delete a vehicle.
+    """
+    vehicle = self.session.query(Vehicle).filter(Vehicle.id == vehicle_id).one()
+    self.session.delete(vehicle)
+  
+  def search_vehicle(self, query):
+    """
+    Search for an vehicle by name or symbol.
+    """
+    query = query + '%'
+    matches = self.session.query(Vehicle).join(Instrument).filter( \
+      or_( \
+        Vehicle.name.ilike(query), \
+        Instrument.symbol.ilike(query) \
+      ) \
+    )
+    return matches
 
   # ### OLD
 

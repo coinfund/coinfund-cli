@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-03 17:14:09
+# @Last Modified time: 2016-09-05 14:02:11
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
@@ -110,6 +110,10 @@ class Dispatcher(object):
         ledger_entry = self.cli.new_ledger_entry()
         self.dao.create_ledger_entry(ledger_entry)
 
+        # print
+        items = self.dao.ledger()
+        self.fmt.print_list(items, Ledger.__headers__)
+
       elif args['delete']:
         entry_id = args.get('--entry-id')
         if entry_id:
@@ -134,12 +138,24 @@ class Dispatcher(object):
       self.fmt.print_list(items, Project.__headers__)
 
     elif args['vehicles']:
-      items = self.dao.vehicles()
-      self.fmt.print_list(items, Vehicle.__headers__)
+      
+      if args['add']:
+        vehicle = self.cli.new_vehicle()
+        self.dao.create_vehicle(vehicle)
 
-    # elif args['positions']:
-    #   items = self.dao.positions()
-    #   self.fmt.print_list(items, Position.__headers__)
+      elif args['delete']:
+        vehicle_id = args.get('--vehicle-id')
+        if not vehicle_id:
+          raise Exception('Provide a valid id.')
+
+        try:
+          self.dao.delete_vehicle(vehicle_id)
+        except:
+          raise Exception('Could not find vehicle with id `%s`' % vehicle_id)
+
+      else:
+        items = self.dao.vehicles()
+        self.fmt.print_list(items, Vehicle.__headers__)
 
     elif args['rates']:
       instr = args.get('--instr')
@@ -175,6 +191,17 @@ class Cli(object):
     instrument = Instrument(name=name, symbol=symbol)
     return instrument
 
+  def new_vehicle(self):
+    """
+    Create a new vehicle.
+    """
+    name      = input('Name: ')
+    instr     = self.search_instrument()
+
+    vehicle   = Vehicle(name=name, instr_id=instr.id)
+    return vehicle
+
+
   def new_ledger_entry(self):
     date          = input('Date [YYYY-MM-DD]: ') or None
     kind          = input('Kind: ')
@@ -188,7 +215,9 @@ class Cli(object):
     vendor        = None
     tx_info       = None
     notes         = None
-
+    settled       = True
+    vehicle       = self.search_vehicle()
+    
     if date:
       date = datetime.datetime.strptime(date, "%Y-%m-%d")    
 
@@ -228,7 +257,9 @@ class Cli(object):
                    venue=venue, \
                    vendor=vendor, \
                    tx_info=tx_info, \
-                   notes=notes \
+                   notes=notes, \
+                   vehicle=vehicle, \
+                   settled=settled \
             )
 
     return entry
@@ -246,6 +277,21 @@ class Cli(object):
       return instr
 
     raise Exception('Could not find instrument record.')
+
+  def search_vehicle(self):
+    """
+    Interactively search for a vehicle.
+    """
+
+    query      = input('Vehicle search: ')
+    matches    = self.dao.search_vehicle(query).all()
+
+    if len(matches) == 1:
+      vehicle = matches[0]
+      print('-> %s' % vehicle.name)
+      return vehicle
+
+    raise Exception('Could not find vehicle record.')
 
   def search_investor(self):
     """
