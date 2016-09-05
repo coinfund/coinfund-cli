@@ -22,7 +22,7 @@ Usage:
   cf vehicles
   cf vehicles add
   cf vehicles delete [--vehicle-id=<id>]
-  cf ledger [--kind] [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>]
+  cf ledger [--kind=<kind>] [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>] [--instr=<symbol>]
   cf ledger import [--file=<file>]
   cf ledger add
   cf ledger delete [--entry-id=<id>]

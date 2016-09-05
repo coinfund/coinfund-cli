@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-05 17:24:27
+# @Last Modified time: 2016-09-05 17:33:16
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
@@ -111,6 +111,7 @@ class Dispatcher(object):
       startdate = args.get('--startdate')
       enddate   = args.get('--enddate')
       total     = args.get('--total')
+      instr     = args.get('--instr')
 
       if args['add']:
         ledger_entry = self.cli.new_ledger_entry()
@@ -152,7 +153,7 @@ class Dispatcher(object):
         importer.import_ledger(ledger_file)
 
       else:
-        items = self.dao.ledger(kind=kind, startdate=startdate, enddate=enddate)
+        items = self.dao.ledger(kind=kind, startdate=startdate, enddate=enddate, instr=instr)
         self.fmt.print_list(items, Ledger.__headers__)
 
     elif args['projects']:

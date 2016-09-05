@@ -2,10 +2,10 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-05 17:15:03
+# @Last Modified time: 2016-09-05 18:28:41
 
 from sqlalchemy import create_engine, desc, asc, or_
-from sqlalchemy.orm import sessionmaker, joinedload
+from sqlalchemy.orm import sessionmaker, joinedload, aliased
 from coinfund.models import Investor, Instrument, Share, Project, Vehicle, Ledger
 from sqlalchemy.sql import func
 
@@ -159,11 +159,15 @@ class CoinfundDao(object):
     else:
       print('Could not find a share with id `%s`' % share_id)
 
-  def ledger(self, kind=None, startdate=None, enddate=None):
+  def ledger(self, kind=None, startdate=None, enddate=None, instr=None):
     """
     Return ledger entries.
     """
-    result = self.session.query(Ledger).order_by(Ledger.date)
+    instr_in = aliased(Instrument)
+    instr_out = aliased(Instrument)
+    result = self.session.query(Ledger) \
+                .outerjoin(instr_in, Ledger.instr_in) \
+                .outerjoin(instr_out, Ledger.instr_out)
 
     if kind:
       result = result.filter(Ledger.kind == kind)
@@ -171,8 +175,15 @@ class CoinfundDao(object):
       result = result.filter(Ledger.date >= startdate)
     if enddate:
       result = result.filter(Ledger.date <= enddate)
+    if instr:
+      result = result.filter( \
+        or_( \
+          instr_in.symbol == instr, 
+          instr_out.symbol == instr,
+        ),
+      )
 
-    return result
+    return result.order_by(Ledger.date)
 
   def create_ledger_entry(self, ledger_entry):
     """
