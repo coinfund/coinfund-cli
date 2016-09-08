@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-07 23:33:52
+# @Last Modified time: 2016-09-08 01:02:35
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
@@ -12,39 +12,53 @@ import inflection
 
 class Dispatcher(object):
 
+  headers = {
+    'investors': Investor.__headers__,
+    'instruments': Instrument.__headers__,
+    'vehicles': Vehicle.__headers__,
+  }
+
   def __init__(self, dao):
     self.dao = dao
     self.fmt = Formatter()
     self.cli = Cli(self.dao, self.fmt)
 
-  def __investors(self):
-    items = self.dao.investors()
-    self.fmt.print_list(items, Investor.__headers__)
+  def __resources(self, resource):
+    """
+    Print the vanilla listing for a resource.
+    """
+    resource = inflection.pluralize(resource)
+    items = getattr(self.dao, resource)()
+    self.fmt.print_list(items, self.headers[resource])
 
-  def __add_investor(self):
-    investor = self.cli.new_investor()
-    self.dao.create_investor(investor)
+  def __add_resource(self, resource):
+    """
+    Add a vanilla resource.
+    """
+    resource  = inflection.singularize(resource)
+    item      = getattr(self.cli, 'new_' + resource)()
+    create    = getattr(self.dao, 'create_' + resource)
+    create(item)
 
-  def __delete_investor(self, investor_id):
-    if not investor_id:
-      investor = self.cli.search_investor()
-      investor_id = investor.id
-    self.dao.delete_investor(investor_id)
+  def __delete_resource(self, resource, resource_id=None):
+    """
+    Delete a vanilla resource.
+    """
+    resource = inflection.singularize(resource)
+    if not resource_id:
+      item = getattr(self.cli, 'search_' + resource)()
+      resource_id = item.id
+    delete = getattr(self.dao, 'delete_' + resource)
+    delete(resource_id)
 
-  def __instruments(self):
-    items = self.dao.instruments()
-    self.fmt.print_list(items, Instrument.__headers__)
-
-  def __add_instrument(self):
-    instrument = self.cli.new_instrument()
-    self.dao.create_instrument(instrument)
-
-  def __delete_instrument(self, instrument_id):
-    if not instrument_id:
-      instrument = self.cli.search_instrument()
-      instrument_id = instrument.id
-    self.dao.delete_instrument(self, instrument_id)
-
+  def __basic_resource_functions(self, args, resource):
+    resource_id = args.get('--id')
+    if args['add']:
+      self.__add_resource(resource)
+    elif args['delete']:
+      self.__delete_resource(resource, resource_id)  
+    else:
+      self.__resources(resource)   
 
   def dispatch(self, args):
     
@@ -52,46 +66,32 @@ class Dispatcher(object):
     # Investors
     #
     if args['investors']:
-      investor_id = args.get('--investor-id')
-
-      if args['add']:
-        self.__add_investor()
-
-      elif args['delete']:
-        self.__delete_investor()
-        
-      else:
-        self.__investors()        
+      self.__basic_resource_functions(args, 'investor')
 
     #
     # Instruments
     #
     elif args['instruments']:
+      self.__basic_resource_functions(args, 'instrument')
 
-      if args['add']:
-        self.__add_instrument()
-
-      elif args['delete']:
-        self.__delete_instrument()
-    
-      else:
-        self.__instruments()
+    #
+    # Vehicles
+    #
+    elif args['vehicles']:
+      self.__basic_resource_functions(args, 'vehicle')
 
     #
     # Shares
     #
     elif args['shares']:
+      resource = 'share'
+      resource_id = args.get('--id')
 
       if args['add']:
-        share = self.cli.new_share()
-        self.dao.create_share(share)
+        self.__add_resource(resource)
 
       elif args['delete']:
-        share_id = args.get('--share-id')
-        if share_id:
-          self.dao.delete_share(share_id)
-        else:
-          print('Could not find share id `%s`' % share_id)
+        self.__delete_resource(resource, resource_id)
 
       else:
         total = args.get('--total')
@@ -126,6 +126,7 @@ class Dispatcher(object):
       instr     = args.get('--instr')
       date      = args.get('--date')
       sale      = args.get('--sale')
+      entry_id  = args.get('--id')
 
       if args['add']:
         ledger_entry = self.cli.new_ledger_entry()
@@ -136,12 +137,8 @@ class Dispatcher(object):
         self.fmt.print_list(items, Ledger.__headers__)
 
       elif args['delete']:
-        entry_id = args.get('--entry-id')
-        if entry_id:
-          self.dao.delete_ledger_entry(entry_id)
-        else:
-          print('Could not find entry id `%s`.' % entry_id)
-
+        self.dao.delete_ledger_entry(entry_id)
+        
       elif args['contributions']:
         if total:
           items = self.dao.total_ledger(kind='Contribution', startdate=startdate, enddate=enddate)
@@ -177,26 +174,6 @@ class Dispatcher(object):
     elif args['projects']:
       items = self.dao.projects()
       self.fmt.print_list(items, Project.__headers__)
-
-    elif args['vehicles']:
-      
-      if args['add']:
-        vehicle = self.cli.new_vehicle()
-        self.dao.create_vehicle(vehicle)
-
-      elif args['delete']:
-        vehicle_id = args.get('--vehicle-id')
-        if not vehicle_id:
-          raise Exception('Provide a valid id.')
-
-        try:
-          self.dao.delete_vehicle(vehicle_id)
-        except:
-          raise Exception('Could not find vehicle with id `%s`' % vehicle_id)
-
-      else:
-        items = self.dao.vehicles()
-        self.fmt.print_list(items, Vehicle.__headers__)
 
     elif args['rates']:
       instr = args.get('--instr')

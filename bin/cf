@@ -11,13 +11,13 @@
 Usage:
   cf investors
   cf investors add
-  cf investors delete [--investor-id=<id>]
+  cf investors delete [--id=<id>]
   cf instruments
   cf instruments add
-  cf instruments delete [--instrument-id=<id>]
+  cf instruments delete [--id=<id>]
   cf shares [--investor] [--total]
   cf shares add
-  cf shares delete [--share-id=<id>]
+  cf shares delete [--id=<id>]
   cf projects
   cf vehicles
   cf vehicles add
@@ -25,7 +25,7 @@ Usage:
   cf ledger [--kind=<kind>] [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>] [--instr=<symbol>] [--date=<YYYY-mm-dd>]
   cf ledger import [--file=<file>]
   cf ledger add
-  cf ledger delete [--entry-id=<id>]
+  cf ledger delete [--id=<id>]
   cf ledger contributions [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>] [--total]
   cf ledger expenses [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>] [--total]
   cf ledger basis [--instr=<symbol>] [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>] [--date=<YYYY-mm-dd>] [--sale]
