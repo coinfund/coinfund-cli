@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-07 22:07:22
+# @Last Modified time: 2016-09-07 22:10:26
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
@@ -324,9 +324,10 @@ class Cli(object):
       self.fmt.print_list(matches, Vehicle.__headers__)
       vehicle_id = input('Vehicle id: ')
       vehicle = None
-      for match in matches:
-        if match.id == int(vehicle_id):
-          return match
+      if vehicle_id:
+        for match in matches:
+          if match.id == int(vehicle_id):
+            return match
 
     raise Exception('Could not find vehicle record.')
 
@@ -346,9 +347,10 @@ class Cli(object):
       self.fmt.print_list(matches, Investor.__headers__)
       investor_id = input('Investor id: ')
       investor = None
-      for match in matches:
-        if match.id == int(investor_id):
-          return match
+      if investor_id:
+        for match in matches:
+          if match.id == int(investor_id):
+            return match
 
     raise Exception('Cound not find investor record.' )
     
