@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-07 22:10:26
+# @Last Modified time: 2016-09-07 23:11:52
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
@@ -24,9 +24,25 @@ class Dispatcher(object):
     investor = self.cli.new_investor()
     self.dao.create_investor(investor)
 
-  def __delete_investor(self):
-    investor = self.cli.search_investor()
+  def __delete_investor(self, investor_id):
+    if not investor_id:
+      investor = self.cli.search_investor()
+      investor_id = investor.id
     self.dao.delete_investor(investor_id)
+
+  def __instruments(self):
+    items = self.dao.instruments()
+    self.fmt.print_list(items, Instrument.__headers__)
+
+  def __add_instrument(self):
+    instrument = self.cli.new_instrument()
+    self.dao.create_instrument(instrument)
+
+  def __delete_instrument(self, instrument_id):
+    if not instrument_id:
+      instrument = self.cli.search_instrument()
+      instrument_id = instrument.id
+    self.dao.delete_instrument(self, instrument_id)
 
   def dispatch(self, args):
     
@@ -51,19 +67,13 @@ class Dispatcher(object):
     elif args['instruments']:
 
       if args['add']:
-        instrument = self.cli.new_instrument()
-        self.dao.create_instrument(instrument)
+        self.__add_instrument()
 
       elif args['delete']:
-        instrument_id = args.get('--instrument-id')
-        if instrument_id:
-          self.dao.delete_instrument(instrument_id)
-        else:
-          print('Could not find instrument id `%s`' % instrument_id)
-      
+        self.__delete_instrument()
+    
       else:
-        items = self.dao.instruments()
-        self.fmt.print_list(items, Instrument.__headers__)
+        self.__instruments()
 
     #
     # Shares

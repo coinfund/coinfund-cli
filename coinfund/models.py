@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-06 14:19:35
+# @Last Modified time: 2016-09-07 22:11:27
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric, func, Boolean
@@ -18,7 +18,8 @@ Base = declarative_base()
 #
 
 def validate_exists(key, value):
-  assert value
+  if not value:
+    raise Exception('Provide a value for `%s`' % key)
   return value
 
 class Investor(Base):
