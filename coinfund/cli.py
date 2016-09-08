@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-05 17:33:16
+# @Last Modified time: 2016-09-07 22:07:22
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
@@ -16,34 +16,34 @@ class Dispatcher(object):
     self.fmt = Formatter()
     self.cli = Cli(self.dao, self.fmt)
 
+  def __investors(self):
+    items = self.dao.investors()
+    self.fmt.print_list(items, Investor.__headers__)
+
+  def __add_investor(self):
+    investor = self.cli.new_investor()
+    self.dao.create_investor(investor)
+
+  def __delete_investor(self):
+    investor = self.cli.search_investor()
+    self.dao.delete_investor(investor_id)
+
   def dispatch(self, args):
     
     #
     # Investors
     #
     if args['investors']:
+      investor_id = args.get('--investor-id')
 
-      #
-      # Add an investor
-      #
       if args['add']:
-        investor = self.cli.new_investor()
-        self.dao.create_investor(investor)
+        self.__add_investor()
 
       elif args['delete']:
-        investor = self.cli.search_investor()
-
-        investor_id = args.get('--investor-id')
-        if investor_id:
-          self.dao.delete_investor(investor_id)
-        else:
-          print('Could not find investor id `%s`' % investor_id)
-      #
-      # List all investors
-      #
+        self.__delete_investor()
+        
       else:
-        items = self.dao.investors()
-        self.fmt.print_list(items, Investor.__headers__)
+        self.__investors()        
 
     #
     # Instruments
@@ -112,6 +112,8 @@ class Dispatcher(object):
       enddate   = args.get('--enddate')
       total     = args.get('--total')
       instr     = args.get('--instr')
+      date      = args.get('--date')
+      sale      = args.get('--sale')
 
       if args['add']:
         ledger_entry = self.cli.new_ledger_entry()
@@ -130,7 +132,7 @@ class Dispatcher(object):
 
       elif args['contributions']:
         if total:
-          items = self.dao.total_ledger('Contribution', startdate=startdate, enddate=enddate)
+          items = self.dao.total_ledger(kind='Contribution', startdate=startdate, enddate=enddate)
           self.fmt.print_result(items, ['total_ledger_contributions'])
         else:
           items = self.dao.ledger(kind='Contribution', startdate=startdate, enddate=enddate)
@@ -138,7 +140,7 @@ class Dispatcher(object):
 
       elif args['expenses']:
         if total:
-          items = self.dao.total_ledger('Expense', startdate=startdate, enddate=enddate)
+          items = self.dao.total_ledger(kind='Expense', startdate=startdate, enddate=enddate)
           self.fmt.print_result(items, ['total_ledger_expenses'])
         else:
           items = self.dao.ledger(kind='Expense', startdate=startdate, enddate=enddate)
@@ -152,8 +154,12 @@ class Dispatcher(object):
         importer = Importer(self.dao)
         importer.import_ledger(ledger_file)
 
+      elif args['basis']:
+        items = self.dao.total_ledger(startdate=startdate, enddate=enddate, date=date, instr=instr, sale=sale)
+        self.fmt.print_result(items, ['usd_value', 'qty', 'avg_usd_price'])
+
       else:
-        items = self.dao.ledger(kind=kind, startdate=startdate, enddate=enddate, instr=instr)
+        items = self.dao.ledger(kind=kind, startdate=startdate, enddate=enddate, date=date, instr=instr)
         self.fmt.print_list(items, Ledger.__headers__)
 
     elif args['projects']:
@@ -313,6 +319,14 @@ class Cli(object):
       vehicle = matches[0]
       print('-> %s' % vehicle.name)
       return vehicle
+
+    elif len(matches) > 1:
+      self.fmt.print_list(matches, Vehicle.__headers__)
+      vehicle_id = input('Vehicle id: ')
+      vehicle = None
+      for match in matches:
+        if match.id == int(vehicle_id):
+          return match
 
     raise Exception('Could not find vehicle record.')
 

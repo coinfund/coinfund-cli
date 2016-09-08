@@ -2,12 +2,13 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-05 18:28:41
+# @Last Modified time: 2016-09-07 15:58:45
 
-from sqlalchemy import create_engine, desc, asc, or_
+from sqlalchemy import create_engine, desc, asc, or_, Float
 from sqlalchemy.orm import sessionmaker, joinedload, aliased
 from coinfund.models import Investor, Instrument, Share, Project, Vehicle, Ledger
 from sqlalchemy.sql import func
+from sqlalchemy.sql.expression import cast
 
 class CoinfundDao(object):
 
@@ -159,7 +160,7 @@ class CoinfundDao(object):
     else:
       print('Could not find a share with id `%s`' % share_id)
 
-  def ledger(self, kind=None, startdate=None, enddate=None, instr=None):
+  def ledger(self, kind=None, startdate=None, enddate=None, date=None, instr=None, basis=None):
     """
     Return ledger entries.
     """
@@ -171,10 +172,13 @@ class CoinfundDao(object):
 
     if kind:
       result = result.filter(Ledger.kind == kind)
-    if startdate:
-      result = result.filter(Ledger.date >= startdate)
-    if enddate:
-      result = result.filter(Ledger.date <= enddate)
+    if date:
+      result = result.filter(Ledger.date >= date, Ledger.date <= date)
+    else:
+      if startdate:
+        result = result.filter(Ledger.date >= startdate)
+      if enddate:
+        result = result.filter(Ledger.date <= enddate)
     if instr:
       result = result.filter( \
         or_( \
@@ -182,6 +186,8 @@ class CoinfundDao(object):
           instr_out.symbol == instr,
         ),
       )
+    elif instr and basis:
+      result = result.filter(instr_in.symbol == instr)
 
     return result.order_by(Ledger.date)
 
@@ -201,20 +207,40 @@ class CoinfundDao(object):
     else:
       print('Could not find a ledger entry with id `%s`' % entry_id)
 
-  def total_ledger(self, kind, startdate=None, enddate=None):
+  def total_ledger(self, kind=None, startdate=None, enddate=None, date=None, instr=None, sale=False):
     """
     Return total ledger usd values.
     """
-    result = self.session.query(func.sum(Ledger.usd_value)).filter(Ledger.kind == kind)
 
-    if startdate:
-      result = result.filter(Ledger.date >= startdate)
+    columns = [func.sum(Ledger.usd_value)]
+    if instr:
+      if sale:
+        columns += [func.sum(Ledger.qty_out), func.sum(Ledger.usd_value) / func.sum(Ledger.qty_out)]
+      else:
+        columns += [func.sum(Ledger.qty_in), func.sum(Ledger.usd_value) / func.sum(Ledger.qty_in)]
 
-    if enddate:
-      result = result.filter(Ledger.date <= enddate)
+    instr_in = aliased(Instrument)
+    instr_out = aliased(Instrument)
+    result = self.session.query(*columns) \
+                .outerjoin(instr_in, Ledger.instr_in) \
+                .outerjoin(instr_out, Ledger.instr_out)
+    if kind:
+      result = result.filter(Ledger.kind == kind)
+
+    if date:
+      result = result.filter(Ledger.date >= date, Ledger.date <= date)
+    else:
+      if startdate:
+        result = result.filter(Ledger.date >= startdate)
+      if enddate:
+        result = result.filter(Ledger.date <= enddate)
+    
+    if sale:
+      result = result.filter(instr_out.symbol == instr)
+    else:
+      result = result.filter(instr_in.symbol == instr)
 
     return result
-
 
   def projects(self):
     """

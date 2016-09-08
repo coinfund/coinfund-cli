@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-05 16:58:41
+# @Last Modified time: 2016-09-06 14:19:35
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric, func, Boolean
@@ -113,7 +113,7 @@ class Vehicle(Base):
   The vehicle model.
   """
   __tablename__ = 'vehicles'
-  __headers__   = ['name', 'instrument', 'homepage', 'description']
+  __headers__   = ['id', 'name', 'instrument', 'homepage', 'description']
 
   id              = Column(Integer, primary_key=True)
   name            = Column(String, nullable=False)
@@ -130,7 +130,7 @@ class Vehicle(Base):
     if self.project:
       homepage = self.project.homepage
       description = self.project.description
-    return [self.name, self.instrument.symbol, homepage, description]
+    return [self.id, self.name, self.instrument.symbol, homepage, description]
 
 
 class Ledger(Base):
@@ -174,6 +174,7 @@ class Ledger(Base):
     vehicle     = None
     tx_info     = None
     notes       = None
+    venue       = None
 
     if self.instr_in:
       instr_in = self.instr_in.symbol
@@ -193,6 +194,9 @@ class Ledger(Base):
     if self.notes:
       notes = self.notes[:30]
 
+    if self.venue:
+      venue = self.venue[:25]
+
     return [self.id, vehicle, self.date.date(), self.kind, self.usd_value, self.qty_in, instr_in , self.qty_out, instr_out, \
-      contributor, self.vendor, tx_info, notes
+      contributor, self.vendor, venue, notes
     ]
