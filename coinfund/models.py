@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-07 22:11:27
+# @Last Modified time: 2016-09-07 23:13:08
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric, func, Boolean
@@ -140,7 +140,7 @@ class Ledger(Base):
   """
   __tablename__   = 'ledger'
   __headers__     = ['id', 'vehicle', 'date', 'kind', 'usd_value', 'qty_in', 'instr_in', 'qty_out', 'instr_out', 
-  'contributor', 'vendor', 'tx_info', 'notes']
+  'contributor', 'vendor', 'venue', 'notes']
 
   id              = Column(Integer, primary_key=True)
   date            = Column(DateTime, nullable=False, server_default=func.now())
