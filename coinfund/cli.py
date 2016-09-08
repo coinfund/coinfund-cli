@@ -2,12 +2,13 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-07 23:11:52
+# @Last Modified time: 2016-09-07 23:33:52
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
 from coinfund.importer import Importer
 import datetime
+import inflection
 
 class Dispatcher(object):
 
@@ -43,6 +44,7 @@ class Dispatcher(object):
       instrument = self.cli.search_instrument()
       instrument_id = instrument.id
     self.dao.delete_instrument(self, instrument_id)
+
 
   def dispatch(self, args):
     
