@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-08 01:02:35
+# @Last Modified time: 2016-10-18 18:02:39
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
@@ -51,12 +51,19 @@ class Dispatcher(object):
     delete = getattr(self.dao, 'delete_' + resource)
     delete(resource_id)
 
+  def __search_resource(self, resource):
+    resource = inflection.singularize(resource)
+    search_fn = getattr(self.cli, 'search_' + resource)
+    search_fn()
+
   def __basic_resource_functions(self, args, resource):
     resource_id = args.get('--id')
     if args['add']:
       self.__add_resource(resource)
     elif args['delete']:
-      self.__delete_resource(resource, resource_id)  
+      self.__delete_resource(resource, resource_id)
+    elif args['search']:
+      self.__search_resource(resource)  
     else:
       self.__resources(resource)   
 
@@ -79,6 +86,12 @@ class Dispatcher(object):
     #
     elif args['vehicles']:
       self.__basic_resource_functions(args, 'vehicle')
+
+    #
+    # Projects
+    #
+    elif args['projects']:
+      self.__basic_resource_functions(args, 'project')
 
     #
     # Shares
@@ -171,9 +184,6 @@ class Dispatcher(object):
         items = self.dao.ledger(kind=kind, startdate=startdate, enddate=enddate, date=date, instr=instr)
         self.fmt.print_list(items, Ledger.__headers__)
 
-    elif args['projects']:
-      items = self.dao.projects()
-      self.fmt.print_list(items, Project.__headers__)
 
     elif args['rates']:
       instr = args.get('--instr')
@@ -293,6 +303,15 @@ class Cli(object):
       instr = matches[0]
       print('-> %s' % instr.symbol)
       return instr
+
+    elif len(matches) > 1:
+      self.fmt.print_list(matches, Instrument.__headers__)
+      instr_id = input('Instrument id: ')
+      instr = None
+      if instr_id:
+        for match in matches:
+          if match.id == int(instr_id):
+            return match
 
     raise Exception('Could not find instrument record.')
 
