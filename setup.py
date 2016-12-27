@@ -2,13 +2,13 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:17:50
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-12-26 16:49:07
+# @Last Modified time: 2016-12-27 12:30:13
 
 from distutils.core import setup
 
 setup(
     name='coinfund-cli',
-    version='1.0',
+    version='1.1',
     description='CoinFund Command-Line Interface',
     author='Jake Brukhman',
     author_email='jake@coinfund.io',

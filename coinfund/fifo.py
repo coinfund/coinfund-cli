@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-12-26 13:11:39
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-12-27 12:16:05
+# @Last Modified time: 2016-12-27 12:52:03
 
 import pandas as pd
 import pickle
@@ -156,10 +156,12 @@ class FifoProcessor():
                       ])
 
     else:
-      inv               = self.inventory.get(instr)  
+      inv               = self.inventory[instr]  
       unit_px           = row.usd_value / row.qty_in
-      inv.loc[len(inv)] = [date, instr, qty, qty, usd_value, unit_px, row_id]
+      new_row           = pd.DataFrame([[date, instr, qty, qty, usd_value, unit_px, row_id]], columns=self.__INVENTORYCOLS)
 
+      self.inventory[instr] = inv.append(new_row, ignore_index=True)
+      
   def __processoutflow(self, row):
     date        = row.date
     instr       = row.instr_out.symbol
@@ -302,6 +304,8 @@ class FifoProcessor():
     instr_in  = row.instr_in
     instr_out = row.instr_out
     
+    print('=> %s in %s/%s out %s/%s\n' % (row.kind, row.instr_in, row.qty_in, row.instr_out, row.qty_out))
+
     if instr_in:
       # this is an inflow
       symbol = instr_in.symbol
@@ -311,13 +315,19 @@ class FifoProcessor():
 
       # append inflow
       self.__processinflow(row)
+      if symbol not in self.__FIAT:
+        print('-------------------------------\n%s\n' % self.inventory[symbol].to_string())
 
     if instr_out:
       symbol = instr_out.symbol
       if not symbol:
         raise Exception('missing symbol on row id %s' % row.id)
       self.__processoutflow(row)
+      if symbol not in self.__FIAT:
+        print('-------------------------------\n%s\n' % self.inventory[symbol].to_string())
 
+
+    
 
 
 

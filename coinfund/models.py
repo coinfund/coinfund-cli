@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:27:36
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-07 23:13:08
+# @Last Modified time: 2016-12-27 12:23:52
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Numeric, func, Boolean
@@ -72,6 +72,9 @@ class Instrument(Base):
   @validates('name', 'symbol')
   def validate_exists(self, key, value):
     return validate_exists(key, value)
+
+  def __str__(self):
+    return self.symbol or 'None'
 
 class Share(Base):
   """
