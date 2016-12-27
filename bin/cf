@@ -30,7 +30,7 @@ Usage:
   cf ledger contributions [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>] [--total]
   cf ledger expenses [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>] [--total]
   cf ledger basis [--instr=<symbol>] [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>] [--date=<YYYY-mm-dd>] [--sale]
-  cf ledger fifo [--instr=<symbol>] [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>] [--tocsv] [--inventorycsv]
+  cf ledger fifo [--instr=<symbol>] [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>] [--tocsv] [--inventorycsv] [--cache] [--usecache]
 
 Options:
   -h --help     Show this screen.

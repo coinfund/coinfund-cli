@@ -2,9 +2,10 @@
 # @Author: Jake Brukhman
 # @Date:   2016-12-26 13:11:39
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-12-26 20:23:01
+# @Last Modified time: 2016-12-27 12:03:12
 
 import pandas as pd
+import pickle
 
 class FifoProcessor():
 
@@ -43,13 +44,37 @@ class FifoProcessor():
                       'pnl', 
                       'term', 
                       'row_id',
+                      'pair_row_id',
                     ]
 
-  def __init__(self, ledgerquery):
+  __INVFILE = '.inventory'
+
+  def __init__(self, ledgerquery, cachedinventory=False):
+    """
+    Take a ledger query and optional cachedinventory in
+    order to perform FIFO analysis.
+    """
     self.ledgerquery = ledgerquery
-    self.inventory = {}
+
+    if cachedinventory:
+      self.inventory = self.__unpickleinventory()
+      print('CACHED INVENTORY')
+      for symbol, inventory in self.inventory.items():
+        print('%s\n\n' % symbol)
+        print('%s\n\n' % inventory.to_string())
+    else:
+      self.inventory = {}
+
     self.taxables = self.__blanktaxables()
     pd.set_option('display.max_columns', 500)
+
+  def __unpickleinventory(self):
+    with open(self.__INVFILE, 'rb') as fp:
+      return pickle.load(fp)
+
+  def __pickleinventory(self):
+    with open(self.__INVFILE, 'wb') as fp:
+      pickle.dump(self.inventory, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
   def fifo(self):
     """
@@ -70,6 +95,9 @@ class FifoProcessor():
   def inventorycsv(self):
     df = pd.concat([df for df in self.inventory.values()])
     df.to_csv('inventory.csv')
+
+  def cacheinventory(self):
+    self.__pickleinventory()
 
   def __blankinventory(self):
     """Return a blank dataframe for inventories."""
@@ -93,7 +121,7 @@ class FifoProcessor():
   def __term(self, acq_date, tx_date):
     if tx_date < acq_date:
       raise Exception('tx date must come after acq date')
-      
+
     delta = tx_date - acq_date
     if delta.days >= 365:
       return 'Long-Term'
@@ -125,6 +153,7 @@ class FifoProcessor():
                         usd_value, 
                         None, 
                         row_id,
+                        None,
                       ])
 
     else:
@@ -141,24 +170,29 @@ class FifoProcessor():
     row_id      = row.id
     kind        = row.kind
 
-    if instr in self.__FIAT:
-      if row.kind in ['Expense']:
-        pnl = -1 * row.usd_value
-        self.__taxable([
-                        date, 
-                        instr, 
-                        kind, 
-                        None, 
-                        qty, 
-                        row.usd_value,
-                        None, 
-                        None, 
-                        None, 
-                        pnl, 
-                        None, 
-                        row_id,
-                      ])
-      return
+    if row.kind in ['Expense']:
+      pnl = -1 * row.usd_value
+      self.__taxable([
+                      date, 
+                      instr, 
+                      kind, 
+                      None, 
+                      qty, 
+                      row.usd_value,
+                      None, 
+                      None, 
+                      None, 
+                      pnl, 
+                      None, 
+                      row_id,
+                      None,
+                    ])
+      # If the expense is paid in fiat,
+      # there is nothing else to do except
+      # record loss.
+      if instr in self.__FIAT:
+        return
+
 
 
     inv = self.inventory.get(instr)  
@@ -187,16 +221,18 @@ class FifoProcessor():
                         pnl, 
                         term, 
                         row_id,
+                        None,
                        ])
         qty = 0
 
       else:
 
-        invrow    = inv.iloc[0]
-        queue_qty = invrow.qty
-        delta     = queue_qty - qty
-        acq_date  = invrow.date
-        term      = self.__term(acq_date, date)
+        invrow      = inv.iloc[0]
+        queue_qty   = invrow.qty
+        delta       = queue_qty - qty
+        acq_date    = invrow.date
+        term        = self.__term(acq_date, date)
+        pair_row_id = invrow.pair_row_id 
 
         if delta >= 0:
 
@@ -220,6 +256,7 @@ class FifoProcessor():
                           pnl, 
                           term, 
                           row_id,
+                          pair_row_id,
                         ])
 
           # if we have exhausted the queue item,
@@ -248,6 +285,7 @@ class FifoProcessor():
                           pnl, 
                           term, 
                           row_id,
+                          pair_row_id,
                         ])
 
           # drop the inventory

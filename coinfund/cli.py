@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-12-26 20:17:27
+# @Last Modified time: 2016-12-26 20:59:30
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
@@ -143,6 +143,8 @@ class Dispatcher(object):
       entry_id  = args.get('--id')
       tocsv     = args.get('--tocsv')
       invcsv    = args.get('--inventorycsv')
+      cache     = args.get('--cache')
+      usecache  = args.get('--usecache')
 
       if args['add']:
         ledger_entry = self.cli.new_ledger_entry()
@@ -186,13 +188,16 @@ class Dispatcher(object):
       elif args['fifo']:
         items = self.dao.ledger(kind=kind, startdate=startdate, enddate=enddate, date=date, instr=instr)
         self.fmt.print_list(items, Ledger.__headers__)
-        fp = FifoProcessor(items)
+        
+        fp = FifoProcessor(items, cachedinventory=usecache)
         fp.fifo()
 
         if tocsv:
           fp.tocsv()
         if invcsv:
           fp.inventorycsv()
+        if cache:
+          fp.cacheinventory()
 
       else:
         items = self.dao.ledger(kind=kind, startdate=startdate, enddate=enddate, date=date, instr=instr)

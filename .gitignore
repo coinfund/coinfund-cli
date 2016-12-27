@@ -1,10 +1,4 @@
 .coinfund
 *.pyc
 *.csv
-
-*.csv
-
-*.csv
-
-*.csv
-
+.inventory
