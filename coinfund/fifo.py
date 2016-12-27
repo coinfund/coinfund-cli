@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-12-26 13:11:39
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-12-26 19:22:30
+# @Last Modified time: 2016-12-26 20:15:49
 
 import pandas as pd
 
@@ -63,6 +63,13 @@ class FifoProcessor():
       print('%s\n\n' % inventory.to_string())
 
     print(self.taxables.to_string())
+
+  def tocsv(self):
+    self.taxables.to_csv('taxables.csv')
+
+  def inventorycsv(self):
+    df = pd.concat([df for df in self.inventory.values()])
+    df.to_csv('inventory.csv')
 
   def __blankinventory(self):
     """Return a blank dataframe for inventories."""
