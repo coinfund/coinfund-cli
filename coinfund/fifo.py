@@ -2,23 +2,24 @@
 # @Author: Jake Brukhman
 # @Date:   2016-12-26 13:11:39
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-12-27 13:33:01
+# @Last Modified time: 2016-12-27 13:59:24
 
 import pandas as pd
 import pickle
 
 class FifoProcessor():
 
-  __KIND = {
-    'Contribution': True,
-    'Gift':         True,
-    'Trade':        True,
-    'Expense':      True,
-    'Interest':     True,
-    'Income':       True,
-  }
+  __KIND = set([
+                'Contribution',
+                'Gift',
+                'Trade',
+                'Expense',
+                'Interest',
+                'Income',
+                'Reimbursement',
+                ])
 
-  __INCOMELIKE = set(['Income', 'Interest', 'Gift'])
+  __INCOMELIKE = set(['Income', 'Interest', 'Gift', 'Reimbursement'])
 
   __FIAT = {
     'USD': True
@@ -205,6 +206,7 @@ class FifoProcessor():
     row_id      = int(row.id)
     kind        = row.kind
 
+    # Treat expenses in a special way.
     if row.kind in ['Expense']:
       pnl = -1 * row.usd_value
       self.__taxable([
@@ -234,7 +236,11 @@ class FifoProcessor():
         # that liquidation.
         kind = 'Expense Liquidation'
 
-    
+    # Outflows of fiat which are not expenses
+    # are just money paid for crypto, so they do not
+    # create taxable events and should be skipped.
+    if instr in self.__FIAT:
+      return
 
     inv = self.inventory.get(instr)  
     while qty > 0:
@@ -244,10 +250,10 @@ class FifoProcessor():
 
         filled_qty            = qty
         usd_value             = row.usd_value
-        pnl                   = row.usd_value
         unit_basis_px         = 0.0
         term                  = 'Short-Term'
         acq_date              = None
+        pnl                   = unit_px * filled_qty
         
         self.__taxable([
                         date, 
@@ -343,6 +349,9 @@ class FifoProcessor():
     # check whether this is an inflow or outflow
     instr_in  = row.instr_in
     instr_out = row.instr_out
+
+    if not row.kind in self.__KIND:
+      raise Exception('invalid kind: %s' % row.kind)
     
     print('=> %s in %s/%s out %s/%s\n' % (row.kind, row.instr_in, row.qty_in, row.instr_out, row.qty_out))
 
