@@ -42,7 +42,6 @@ from coinfund.dao import CoinfundDao
 from coinfund.cli import Dispatcher
 
 import pandas as pd
-import numpy as np
 import yaml
 import sys
 
@@ -86,6 +85,9 @@ def import_settings():
   SETTINGS = doc
     
   fp.close()
+
+  pd.set_option('display.max_columns', 500)
+  pd.set_option('precision', 6)
 
 def main(args):
   """

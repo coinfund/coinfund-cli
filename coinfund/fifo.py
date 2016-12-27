@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-12-26 13:11:39
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-12-27 12:04:27
+# @Last Modified time: 2016-12-27 12:16:05
 
 import pandas as pd
 import pickle
@@ -66,7 +66,6 @@ class FifoProcessor():
       self.inventory = {}
 
     self.taxables = self.__blanktaxables()
-    pd.set_option('display.max_columns', 500)
 
   def __unpickleinventory(self):
     with open(self.__INVFILE, 'rb') as fp:
@@ -232,7 +231,7 @@ class FifoProcessor():
         delta       = queue_qty - qty
         acq_date    = invrow.date
         term        = self.__term(acq_date, date)
-        pair_row_id = int(invrow.pair_row_id)
+        pair_row_id = int(invrow.row_id)
 
         if delta >= 0:
 
