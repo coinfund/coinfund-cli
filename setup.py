@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:17:50
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-07 23:33:38
+# @Last Modified time: 2016-12-26 16:49:07
 
 from distutils.core import setup
 
@@ -22,6 +22,8 @@ setup(
       'sqlalchemy',
       'tabulate',
       'alembic',
-      'inflection'
+      'inflection',
+      'pandas',
+      'numpy'
     ]
 )

@@ -2,11 +2,12 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-03 11:01:22
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-10-18 18:02:39
+# @Last Modified time: 2016-12-26 16:45:32
 
 from coinfund.models import *
 from coinfund.formatter import Formatter
 from coinfund.importer import Importer
+from coinfund.fifo import FifoProcessor
 import datetime
 import inflection
 
@@ -179,16 +180,17 @@ class Dispatcher(object):
       elif args['basis']:
         items = self.dao.total_ledger(startdate=startdate, enddate=enddate, date=date, instr=instr, sale=sale)
         self.fmt.print_result(items, ['usd_value', 'qty', 'avg_usd_price'])
+      
+      elif args['fifo']:
+        items = self.dao.ledger(kind=kind, startdate=startdate, enddate=enddate, date=date, instr=instr)
+        self.fmt.print_list(items, Ledger.__headers__)
+        fp = FifoProcessor(items)
+        fp.fifo()
 
       else:
         items = self.dao.ledger(kind=kind, startdate=startdate, enddate=enddate, date=date, instr=instr)
         self.fmt.print_list(items, Ledger.__headers__)
 
-
-    elif args['rates']:
-      instr = args.get('--instr')
-      items = self.dao.rates(instr=instr)
-      self.fmt.print_list(items, Rate.__headers__, floatfmt='.8f')
 
     self.dao.commit()
     self.dao.close()

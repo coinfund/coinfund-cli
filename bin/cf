@@ -30,6 +30,7 @@ Usage:
   cf ledger contributions [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>] [--total]
   cf ledger expenses [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>] [--total]
   cf ledger basis [--instr=<symbol>] [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>] [--date=<YYYY-mm-dd>] [--sale]
+  cf ledger fifo [--instr=<symbol>] [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>]
 
 Options:
   -h --help     Show this screen.
@@ -40,6 +41,8 @@ from docopt import docopt
 from coinfund.dao import CoinfundDao
 from coinfund.cli import Dispatcher
 
+import pandas as pd
+import numpy as np
 import yaml
 import sys
 
@@ -81,7 +84,7 @@ def import_settings():
       
   # get the settings
   SETTINGS = doc
-
+    
   fp.close()
 
 def main(args):
