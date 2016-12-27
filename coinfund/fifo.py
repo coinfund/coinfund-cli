@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-12-26 13:11:39
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-12-26 20:15:49
+# @Last Modified time: 2016-12-26 20:23:01
 
 import pandas as pd
 
@@ -91,6 +91,9 @@ class FifoProcessor():
     self.taxables.loc[l] = row
 
   def __term(self, acq_date, tx_date):
+    if tx_date < acq_date:
+      raise Exception('tx date must come after acq date')
+      
     delta = tx_date - acq_date
     if delta.days >= 365:
       return 'Long-Term'
