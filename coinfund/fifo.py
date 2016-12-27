@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-12-26 13:11:39
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-12-27 12:03:12
+# @Last Modified time: 2016-12-27 12:04:27
 
 import pandas as pd
 import pickle
@@ -134,7 +134,7 @@ class FifoProcessor():
     kind      = row.kind
     qty       = row.qty_in
     usd_value = row.usd_value
-    row_id    = row.id
+    row_id    = int(row.id)
 
     # skip USD inflows, unless they are income
     # or interest
@@ -167,7 +167,7 @@ class FifoProcessor():
     total_qty   = row.qty_out
     unit_px     = row.usd_value / row.qty_out
     qty         = total_qty
-    row_id      = row.id
+    row_id      = int(row.id)
     kind        = row.kind
 
     if row.kind in ['Expense']:
@@ -232,7 +232,7 @@ class FifoProcessor():
         delta       = queue_qty - qty
         acq_date    = invrow.date
         term        = self.__term(acq_date, date)
-        pair_row_id = invrow.pair_row_id 
+        pair_row_id = int(invrow.pair_row_id)
 
         if delta >= 0:
 
