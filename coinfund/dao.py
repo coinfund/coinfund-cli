@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-07-01 11:18:53
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-09-07 15:58:45
+# @Last Modified time: 2016-12-27 13:17:15
 
 from sqlalchemy import create_engine, desc, asc, or_, Float
 from sqlalchemy.orm import sessionmaker, joinedload, aliased
@@ -189,7 +189,7 @@ class CoinfundDao(object):
     elif instr and basis:
       result = result.filter(instr_in.symbol == instr)
 
-    return result.order_by(Ledger.date)
+    return result.order_by(Ledger.date, Ledger.id)
 
   def create_ledger_entry(self, ledger_entry):
     """

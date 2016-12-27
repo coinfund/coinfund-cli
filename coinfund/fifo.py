@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-12-26 13:11:39
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-12-27 12:52:03
+# @Last Modified time: 2016-12-27 13:33:01
 
 import pandas as pd
 import pickle
@@ -18,13 +18,15 @@ class FifoProcessor():
     'Income':       True,
   }
 
+  __INCOMELIKE = set(['Income', 'Interest', 'Gift'])
+
   __FIAT = {
     'USD': True
   }
 
   __INVENTORYCOLS = [
                       'date', 
-                      'instr', 
+                      'instr',
                       'qty', 
                       'original_qty', 
                       'usd_value', 
@@ -135,10 +137,11 @@ class FifoProcessor():
     usd_value = row.usd_value
     row_id    = int(row.id)
 
-    # skip USD inflows, unless they are income
-    # or interest
     if row.instr_in.symbol in self.__FIAT:
-      if row.kind in ['Income', 'Interest', 'Gift']:
+
+      # Income-like inflows of fiat are treated
+      # as income and create a taxable event.
+      if row.kind in self.__INCOMELIKE:
         self.__taxable([
                         date, 
                         instr, 
@@ -154,12 +157,43 @@ class FifoProcessor():
                         row_id,
                         None,
                       ])
-
     else:
+      # Inflows of crypto are recorded in the inventory,
+      # but may create taxable events if they are received
+      # as income, interest, or gifts.
+
       inv               = self.inventory[instr]  
       unit_px           = row.usd_value / row.qty_in
-      new_row           = pd.DataFrame([[date, instr, qty, qty, usd_value, unit_px, row_id]], columns=self.__INVENTORYCOLS)
 
+      # If the cryptocurrency is received as income, interest, 
+      # or gift, then this creates a taxable event
+      if row.kind in self.__INCOMELIKE:
+        self.__taxable([
+                        date,
+                        instr,
+                        kind,
+                        None,
+                        qty,
+                        usd_value,
+                        date,
+                        0.0,
+                        unit_px,
+                        usd_value,
+                        None,
+                        row_id,
+                        None,
+                      ])
+      
+      # Record a new inventory entry.
+      new_row               = pd.DataFrame([[
+                                  date, 
+                                  instr, 
+                                  qty, 
+                                  qty, 
+                                  usd_value, 
+                                  unit_px, 
+                                  row_id,
+                              ]], columns=self.__INVENTORYCOLS)
       self.inventory[instr] = inv.append(new_row, ignore_index=True)
       
   def __processoutflow(self, row):
@@ -193,8 +227,14 @@ class FifoProcessor():
       # record loss.
       if instr in self.__FIAT:
         return
+      else:
+        # If we get here, that means we paid
+        # expenses in crypto, and subsequent
+        # processing will produce gain/loss for
+        # that liquidation.
+        kind = 'Expense Liquidation'
 
-
+    
 
     inv = self.inventory.get(instr)  
     while qty > 0:
