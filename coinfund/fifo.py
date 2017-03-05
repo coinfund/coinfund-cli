@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-12-26 13:11:39
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2016-12-27 13:59:24
+# @Last Modified time: 2017-03-05 14:49:01
 
 import pandas as pd
 import pickle
@@ -249,7 +249,7 @@ class FifoProcessor():
       if (inv is None) or (len(inv) == 0):
 
         filled_qty            = qty
-        usd_value             = row.usd_value
+        usd_value             = unit_px * filled_qty
         unit_basis_px         = 0.0
         term                  = 'Short-Term'
         acq_date              = None
@@ -286,7 +286,7 @@ class FifoProcessor():
           inv.ix[inv.index[0], 'qty'] = delta
           
           filled_qty      = qty
-          usd_value       = row.usd_value
+          usd_value       = unit_px * filled_qty
           unit_basis_px   = invrow.unit_px
           pnl             = (unit_px - unit_basis_px) * filled_qty
 
