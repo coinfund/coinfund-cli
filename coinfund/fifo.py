@@ -2,7 +2,7 @@
 # @Author: Jake Brukhman
 # @Date:   2016-12-26 13:11:39
 # @Last Modified by:   Jake Brukhman
-# @Last Modified time: 2017-03-05 14:49:01
+# @Last Modified time: 2017-10-21 14:11:03
 
 import pandas as pd
 import pickle
@@ -368,9 +368,13 @@ class FifoProcessor():
         print('-------------------------------\n%s\n' % self.inventory[symbol].to_string())
 
     if instr_out:
+      # this is an outflow
       symbol = instr_out.symbol
       if not symbol:
         raise Exception('missing symbol on row id %s' % row.id)
+      self.__ensureinstr(symbol)
+      
+      # append outflow
       self.__processoutflow(row)
       if symbol not in self.__FIAT:
         print('-------------------------------\n%s\n' % self.inventory[symbol].to_string())
