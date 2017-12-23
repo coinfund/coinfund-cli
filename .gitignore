@@ -1,6 +1,5 @@
 .coinfund
 *.pyc
 *.csv
-.inventory
-.DS_Store
-.python-version
+.*
+/build/
