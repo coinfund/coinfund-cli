@@ -52,22 +52,12 @@ class FifoProcessor():
 
   __INVFILE = '.inventory'
 
-  def __init__(self, ledgerquery, cachedinventory=False):
+  def __init__(self, ledgerquery=None):
     """
-    Take a ledger query and optional cachedinventory in
-    order to perform FIFO analysis.
+    Take a ledger query to perform FIFO.
     """
     self.ledgerquery = ledgerquery
-
-    if cachedinventory:
-      self.inventory = self.__unpickleinventory()
-      print('CACHED INVENTORY')
-      for symbol, inventory in self.inventory.items():
-        print('%s\n\n' % symbol)
-        print('%s\n\n' % inventory.to_string())
-    else:
-      self.inventory = {}
-
+    self.inventory = {}
     self.taxables = self.__blanktaxables()
 
   def __unpickleinventory(self):
@@ -77,6 +67,26 @@ class FifoProcessor():
   def __pickleinventory(self):
     with open(self.__INVFILE, 'wb') as fp:
       pickle.dump(self.inventory, fp, protocol=pickle.HIGHEST_PROTOCOL)
+
+  def __uncsvinventory(self, csv_file):
+    df = pd.read_csv(csv_file)
+    instrs = df.instr.unique()
+    inventory = {}
+    for instr in instrs:
+      inventory[instr] = df.loc[df.instr == instr]
+    return inventory
+
+  def load_inventory_from_cache(self):
+    """
+    Load the inventory from the local cache.
+    """
+    self.inventory = self.__unpickleinventory()
+
+  def load_inventory_from_csv(self, csv_file):
+    """
+    Load the inventory from a CSV file.
+    """
+    self.inventory = self.__uncsvinventory(csv_file)
 
   def fifo(self):
     """

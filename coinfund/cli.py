@@ -133,18 +133,19 @@ class Dispatcher(object):
     #
     elif args['ledger']:
 
-      kind      = args.get('--kind')
-      startdate = args.get('--startdate')
-      enddate   = args.get('--enddate')
-      total     = args.get('--total')
-      instr     = args.get('--instr')
-      date      = args.get('--date')
-      sale      = args.get('--sale')
-      entry_id  = args.get('--id')
-      tocsv     = args.get('--tocsv')
-      invcsv    = args.get('--inventorycsv')
-      cache     = args.get('--cache')
-      usecache  = args.get('--usecache')
+      kind            = args.get('--kind')
+      startdate       = args.get('--startdate')
+      enddate         = args.get('--enddate')
+      total           = args.get('--total')
+      instr           = args.get('--instr')
+      date            = args.get('--date')
+      sale            = args.get('--sale')
+      entry_id        = args.get('--id')
+      tocsv           = args.get('--tocsv')
+      invcsv          = args.get('--inventorycsv')
+      cache           = args.get('--cache')
+      usecache        = args.get('--usecache')
+      useinventorycsv = args.get('--userinventorycsv')
 
       if args['add']:
         ledger_entry = self.cli.new_ledger_entry()
@@ -186,10 +187,17 @@ class Dispatcher(object):
         self.fmt.print_result(items, ['usd_value', 'qty', 'avg_usd_price'])
       
       elif args['fifo']:
+
         items = self.dao.ledger(kind=kind, startdate=startdate, enddate=enddate, date=date, instr=instr)
         self.fmt.print_list(items, Ledger.__headers__)
         
-        fp = FifoProcessor(items, cachedinventory=usecache)
+        fp = FifoProcessor(items)
+
+        if usecache:
+          fp.load_inventory_from_cache()
+        elif useinventorycsv:
+          fp.load_inventory_from_csv(userinventorycsv)
+
         fp.fifo()
 
         if tocsv:
@@ -198,6 +206,22 @@ class Dispatcher(object):
           fp.inventorycsv()
         if cache:
           fp.cacheinventory()
+
+      elif args['inventory']:
+        fromcache     = args.get('--fromcache')
+        fromcsv       = args.get('--fromcsv')
+
+        fp = FifoProcessor()
+
+        if fromcsv:
+          fp.load_inventory_from_csv(fromcsv)
+
+        else:
+          fp.load_inventory_from_cache()
+        
+        for (key, value) in fp.inventory.items():
+          print('\n', key, '\n')
+          self.fmt.print_result(value, ['date', 'instr', 'qty', 'original_qty', 'usd_value', 'unit_px', 'row_id'])
 
       else:
         items = self.dao.ledger(kind=kind, startdate=startdate, enddate=enddate, date=date, instr=instr)
@@ -384,4 +408,4 @@ class Cli(object):
 
     share = Share(investor_id=investor.id, units=units, issued_date=(issued_date or None))
     return share
-      
+
