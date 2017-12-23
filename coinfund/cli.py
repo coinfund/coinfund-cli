@@ -8,6 +8,7 @@ from coinfund.models import *
 from coinfund.formatter import Formatter
 from coinfund.importer import Importer
 from coinfund.fifo import FifoProcessor
+from coinfund.scenario import Scenario
 import datetime
 import inflection
 
@@ -129,6 +130,26 @@ class Dispatcher(object):
           self.fmt.print_list(items, Share.__headers__)
 
     #
+    # SCENARIO
+    #      
+    elif args['scenario']:
+      useinventorycsv = args.get('--useinventorycsv')
+      scenariotype    = args.get('--type')
+      instr           = args.get('--instr')
+
+      fp = FifoProcessor()
+
+      if useinventorycsv:
+        fp.load_inventory_from_csv(userinventorycsv)
+      else:
+        fp.load_inventory_from_cache()
+
+      scenario = Scenario(fp.inventory)
+      
+      if args['asset_liquidation']:
+        scenario.asset_liquidation(instr)
+
+    #
     # LEDGER
     #
     elif args['ledger']:
@@ -208,13 +229,11 @@ class Dispatcher(object):
           fp.cacheinventory()
 
       elif args['inventory']:
-        fromcache     = args.get('--fromcache')
-        fromcsv       = args.get('--fromcsv')
 
         fp = FifoProcessor()
 
-        if fromcsv:
-          fp.load_inventory_from_csv(fromcsv)
+        if useinventorycsv:
+          fp.load_inventory_from_csv(useinventorycsv)
 
         else:
           fp.load_inventory_from_cache()
@@ -226,8 +245,7 @@ class Dispatcher(object):
       else:
         items = self.dao.ledger(kind=kind, startdate=startdate, enddate=enddate, date=date, instr=instr)
         self.fmt.print_list(items, Ledger.__headers__)
-
-
+    
     self.dao.commit()
     self.dao.close()
 
