@@ -24,6 +24,7 @@ setup(
       'alembic',
       'inflection',
       'pandas',
-      'numpy'
+      'numpy',
+      'cryptocompare'
     ]
 )

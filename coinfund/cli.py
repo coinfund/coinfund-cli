@@ -136,6 +136,7 @@ class Dispatcher(object):
       useinventorycsv = args.get('--useinventorycsv')
       scenariotype    = args.get('--type')
       instr           = args.get('--instr')
+      proceedslimit   = args.get('--proceedslimit')
 
       fp = FifoProcessor()
 
@@ -147,7 +148,7 @@ class Dispatcher(object):
       scenario = Scenario(fp.inventory)
       
       if args['asset_liquidation']:
-        scenario.asset_liquidation(instr)
+        scenario.asset_liquidation(instr, proceedslimit=proceedslimit)
 
     #
     # LEDGER

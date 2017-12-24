@@ -34,9 +34,13 @@ class Scenario(object):
         else:
           return self.strate * gains
 
-    def asset_liquidation(self, instr):
+    def asset_liquidation(self, instr, proceedslimit=None):
+
         if self.inventory[instr].empty:
             raise Exception('No such asset in inventory.')
+
+        if proceedslimit:
+            proceedslimit = Decimal(proceedslimit)
 
         inv   = self.inventory[instr]
         px    = self.price.of(instr)
@@ -53,21 +57,37 @@ class Scenario(object):
 
         report_rows = []
         report_header = ['instr', 'qty', 'liq_px', 'unit_px', 'acq_date', 'proceeds', 'gains', 'liability', 'netproceeds', 'lossrate']
-
+        terminate = False
+            
         for inx, row in inv.iterrows():
-            qty         = Decimal(row.qty)
-            unit_px     = Decimal(row.unit_px)
-            proceeds    = px * qty
-            gains       = qty * (px - unit_px)
-            liability   = self.__getliability(gains, row.date, today)
-            netproceeds = proceeds - liability
-            lossrate    = liability / proceeds
-            total_qty         += qty
-            total_proceeds    += proceeds
-            total_gains       += gains
-            total_liability   += liability
-            total_netproceeds += netproceeds
+        
+            qty                 = Decimal(row.qty)
+            proceeds            = px * qty
+           
+            # check for proceeds limit
+            if proceedslimit:
+                deltaproceeds = proceedslimit - total_proceeds
+                if proceeds > deltaproceeds:
+                    qty = deltaproceeds /  px
+                    proceeds = px * qty
+                    terminate = True
+
+            unit_px             = Decimal(row.unit_px)
+            gains               = qty * (px - unit_px)
+            liability           = self.__getliability(gains, row.date, today)
+            netproceeds         = proceeds - liability
+            lossrate            = liability / proceeds
+
+            total_qty           += qty
+            total_proceeds      += proceeds
+            total_gains         += gains
+            total_liability     += liability
+            total_netproceeds   += netproceeds
+
             report_rows.append([instr, qty, px, unit_px, row.date, proceeds, gains, liability, netproceeds, lossrate])
+          
+            if terminate:
+                break
 
         self.fmt.print_result(report_rows, report_header)
         total_lossrate = total_liability / total_proceeds
