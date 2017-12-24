@@ -140,7 +140,7 @@ class Dispatcher(object):
       fp = FifoProcessor()
 
       if useinventorycsv:
-        fp.load_inventory_from_csv(userinventorycsv)
+        fp.load_inventory_from_csv(useinventorycsv)
       else:
         fp.load_inventory_from_cache()
 

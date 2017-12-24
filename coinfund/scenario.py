@@ -52,12 +52,13 @@ class Scenario(object):
         total_netproceeds = Decimal(0)
 
         report_rows = []
-        report_header = ['instr', 'qty', 'liq_px', 'unit_px', 'proceeds', 'gains', 'liability', 'netproceeds', 'lossrate']
+        report_header = ['instr', 'qty', 'liq_px', 'unit_px', 'acq_date', 'proceeds', 'gains', 'liability', 'netproceeds', 'lossrate']
 
         for inx, row in inv.iterrows():
-            qty         = row.qty
-            proceeds    = px * row.qty
-            gains       = qty * (px - row.unit_px)
+            qty         = Decimal(row.qty)
+            unit_px     = Decimal(row.unit_px)
+            proceeds    = px * qty
+            gains       = qty * (px - unit_px)
             liability   = self.__getliability(gains, row.date, today)
             netproceeds = proceeds - liability
             lossrate    = liability / proceeds
@@ -66,8 +67,8 @@ class Scenario(object):
             total_gains       += gains
             total_liability   += liability
             total_netproceeds += netproceeds
-            report_rows.append([instr, qty, px, row.unit_px, proceeds, gains, liability, netproceeds, lossrate])
+            report_rows.append([instr, qty, px, unit_px, row.date, proceeds, gains, liability, netproceeds, lossrate])
 
         self.fmt.print_result(report_rows, report_header)
         total_lossrate = total_liability / total_proceeds
-        self.fmt.print_result([[instr, total_qty, px, None, total_proceeds, total_gains, total_liability, total_netproceeds, total_lossrate]], report_header)
+        self.fmt.print_result([[instr, total_qty, px, None, None, total_proceeds, total_gains, total_liability, total_netproceeds, total_lossrate]], report_header)

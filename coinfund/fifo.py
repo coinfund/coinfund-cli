@@ -70,6 +70,7 @@ class FifoProcessor():
 
   def __uncsvinventory(self, csv_file):
     df = pd.read_csv(csv_file)
+    df['date'] = pd.to_datetime(df['date'])
     instrs = df.instr.unique()
     inventory = {}
     for instr in instrs:

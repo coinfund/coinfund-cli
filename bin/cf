@@ -32,8 +32,8 @@ Usage:
   cf ledger basis [--instr=<symbol>] [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>] [--date=<YYYY-mm-dd>] [--sale]
   cf ledger inventory [--usecache] [--useinventorycsv=<file>]
   cf ledger fifo [--instr=<symbol>] [--startdate=<YYYY-mm-dd>] [--enddate=<YYYY-mm-dd>] [--tocsv] [--inventorycsv] [--cache] [--usecache] [--useinventorycsv=<file>]
-  cf scenario asset_liquidation [--instr=<symbol>]
-  
+  cf scenario asset_liquidation [--instr=<symbol>] [--useinventorycsv=<file>]
+
 Options:
   -h --help     Show this screen.
 
