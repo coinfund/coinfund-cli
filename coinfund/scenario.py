@@ -76,7 +76,7 @@ class Scenario(object):
             gains               = qty * (px - unit_px)
             liability           = self.__getliability(gains, row.date, today)
             netproceeds         = proceeds - liability
-            lossrate            = liability / proceeds
+            lossrate            = max(liability / proceeds,0)
 
             total_qty           += qty
             total_proceeds      += proceeds

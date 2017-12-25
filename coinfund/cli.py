@@ -167,7 +167,7 @@ class Dispatcher(object):
       invcsv          = args.get('--inventorycsv')
       cache           = args.get('--cache')
       usecache        = args.get('--usecache')
-      useinventorycsv = args.get('--userinventorycsv')
+      useinventorycsv = args.get('--useinventorycsv')
 
       if args['add']:
         ledger_entry = self.cli.new_ledger_entry()
