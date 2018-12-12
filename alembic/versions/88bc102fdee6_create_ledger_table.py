@@ -17,7 +17,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import ENUM
 
 kind_enum_values    = ('Contribution', 'Expense', 'Trade', 'Income', 'Reimbursement', 'Interest', 'Distribution', 'Gift')
-kind_enum           = ENUM(*kind_enum_values, name='kind', create_type=False)
+kind_enum           = ENUM(*kind_enum_values, name='kind', create_type=True)
 
 def upgrade():
   # enums

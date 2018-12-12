@@ -218,7 +218,7 @@ class Dispatcher(object):
         if usecache:
           fp.load_inventory_from_cache()
         elif useinventorycsv:
-          fp.load_inventory_from_csv(userinventorycsv)
+          fp.load_inventory_from_csv(useinventorycsv)
 
         fp.fifo()
 

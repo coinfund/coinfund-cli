@@ -6,6 +6,7 @@
 
 import pandas as pd
 import pickle
+from decimal import Decimal
 
 class FifoProcessor():
 
@@ -145,7 +146,7 @@ class FifoProcessor():
     date      = row.date
     instr     = row.instr_in.symbol
     kind      = row.kind
-    qty       = row.qty_in
+    qty       = Decimal(row.qty_in)
     usd_value = row.usd_value
     row_id    = int(row.id)
 
@@ -286,7 +287,7 @@ class FifoProcessor():
       else:
 
         invrow      = inv.iloc[0]
-        queue_qty   = invrow.qty
+        queue_qty   = Decimal(invrow.qty)
         delta       = queue_qty - qty
         acq_date    = invrow.date
         term        = self.__term(acq_date, date)
